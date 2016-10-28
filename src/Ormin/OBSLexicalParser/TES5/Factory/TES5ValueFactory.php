@@ -1097,13 +1097,9 @@ class TES5ValueFactory
             }
             case "getdisposition": {
 
-                /**
-                 * @TODO - Create a disposition system in Skyrim
-                 * For now - hardcoded 100.
-                 */
-                return new TES5Integer(100);
-
-//                throw new ConversionException("GetDisposition() is not accessible via Papyrus.");
+		$arguments = new TES5ObjectCallArguments();
+		$arguments->add(new TES5String("Variable01"));
+                return $this->createObjectCall($calledOn, "GetActorValue",$multipleScriptsScope, $arguments);
                 break;
             }
             case "getdistance": {
