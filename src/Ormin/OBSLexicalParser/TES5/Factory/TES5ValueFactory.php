@@ -1470,7 +1470,7 @@ class TES5ValueFactory
                 return $this->createReadReference("Fame", $globalScope, $multipleScriptsScope, $localScope);
             }
             case "getpcinfamy": {
-                return $this->createReadReference("PCInfamy", $globalScope, $multipleScriptsScope, $localScope);
+                return $this->createReadReference("Infamy", $globalScope, $multipleScriptsScope, $localScope);
             }
             case "getpcisrace": {
                 //Made in post-analysis
