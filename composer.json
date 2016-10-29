@@ -1,0 +1,28 @@
+{
+    "name": "Ormin/obs-lexical-parser",
+    "description": "OBScript Lexical parser and translator",
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "license": "BSD",
+    "authors": [
+        {
+            "name": "Ormin",
+            "email": "orminapod3@gmail.com"
+        }
+    ],
+    "require": {
+        "eloquent/enumeration": "*",
+        "jakubledl/dissect": "dev-develop",
+        "symfony/console": "*",
+        "doctrine/collections": "*",
+        "eddturtle/php-async-calls": "*",
+        "camspiers/pthreads-pool": "^0.2.0",
+        "dariuszp/cli-progress-bar": "^1.0",
+        "amphp/amp": "^1.2"
+    },
+    "autoload": {
+        "psr-0": {"": "src/"},
+        "classmap": ["vendor/eddturtle/php-async-calls/lib/"]
+    }
+}

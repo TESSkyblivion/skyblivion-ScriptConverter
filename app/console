@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+ini_set("memory_limit", "2048M");
+set_time_limit(60);
+// application.php
+include('vendor/autoload.php');
+
+use Ormin\OBSLexicalParser\Commands\BuildCommand;
+use Ormin\OBSLexicalParser\Commands\ParseCommand;
+use Ormin\OBSLexicalParser\Commands\ParseListCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+
+//Current buildchain
+$application->add(new \Ormin\OBSLexicalParser\Commands\BuildTargetCommand());
+$application->add(new \Ormin\OBSLexicalParser\Commands\BuildScriptCommand());
+$application->add(new \Ormin\OBSLexicalParser\Commands\BuildInteroperableCompilationGraphs());
+$application->run();
