@@ -6,29 +6,20 @@
 
 namespace Ormin\OBSLexicalParser\TES5\Converter;
 
-use Ormin\OBSLexicalParser\TES4\AST\Block\TES4CodeBlock;
 use Ormin\OBSLexicalParser\TES4\AST\Code\TES4CodeChunks;
-use Ormin\OBSLexicalParser\TES4\AST\TES4Script;
-use Ormin\OBSLexicalParser\TES4\AST\VariableDeclaration\TES4VariableDeclaration;
 use Ormin\OBSLexicalParser\TES4\AST\VariableDeclaration\TES4VariableDeclarationList;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
-use Ormin\OBSLexicalParser\TES4\Types\TES4Type;
 use Ormin\OBSLexicalParser\TES5\AST\Block\TES5BlockList;
-use Ormin\OBSLexicalParser\TES5\AST\Block\TES5EventCodeBlock;
-use Ormin\OBSLexicalParser\TES5\AST\Block\TES5FunctionCodeBlock;
-use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
-use Ormin\OBSLexicalParser\TES5\AST\Property\TES5Property;
-use Ormin\OBSLexicalParser\TES5\AST\Property\TES5Variable;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Script;
+use Ormin\OBSLexicalParser\TES5\AST\TES5ScriptCollection;
 use Ormin\OBSLexicalParser\TES5\AST\TES5ScriptHeader;
-use Ormin\OBSLexicalParser\TES5\Factory\TES5BlockFactory;
+use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5FragmentFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5PropertiesFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ReferenceFactory;
-use Ormin\OBSLexicalParser\TES5\Factory\TES5TypeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ValueFactory;
 use Ormin\OBSLexicalParser\TES5\Other\TES5FragmentType;
 use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
@@ -68,9 +59,9 @@ class TES4ToTES5ASTTIFFragmentConverter
      */
     private $nameTransformer;
 
-    public function __construct(TES5FragmentFactory $fragmentFactory, TES5ValueFactory $valueFactory, TES5ReferenceFactory $referenceFactory, TES5PropertiesFactory $propertiesFactory, TES5NameTransformer $nameTransformer)
+    public function __construct(ESMAnalyzer $esmAnalyzer, TES5FragmentFactory $fragmentFactory, TES5ValueFactory $valueFactory, TES5ReferenceFactory $referenceFactory, TES5PropertiesFactory $propertiesFactory, TES5NameTransformer $nameTransformer)
     {
-        $this->esmAnalyzer = new ESMAnalyzer();
+        $this->esmAnalyzer = $esmAnalyzer;
         $this->fragmentFactory = $fragmentFactory;
         $this->valueFactory = $valueFactory;
         $this->referenceFactory = $referenceFactory;
@@ -81,12 +72,13 @@ class TES4ToTES5ASTTIFFragmentConverter
 
     /**
      * @param string $scriptName
+     * @param string $outputPath
      * @param TES4VariableDeclarationList $variableList
      * @param TES4CodeChunks $script
-     * @return TES5Script
+     * @return TES5Target
      * @throws ConversionException
      */
-    public function convert($scriptName, TES4VariableDeclarationList $variableList, TES4CodeChunks $script)
+    public function convert($scriptName, $outputPath, TES4VariableDeclarationList $variableList, TES4CodeChunks $script)
     {
 
         //Create the header.
@@ -108,7 +100,12 @@ class TES4ToTES5ASTTIFFragmentConverter
         $blockList = new TES5BlockList();
         $blockList->add($fragment);
 
-        return new TES5Script($scriptHeader, $globalScope, $blockList);
+        $script = new TES5Script($scriptHeader, $globalScope, $blockList);
+
+        $collection = new TES5ScriptCollection();
+        $collection->add($script, $outputPath);
+
+        return $collection;
 
     }
 
