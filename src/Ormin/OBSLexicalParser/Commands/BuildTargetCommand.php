@@ -60,7 +60,7 @@ class BuildTargetCommand extends Command
 
                 $sourceFiles = array_slice(scandir($buildTarget->getSourcePath()), 2);
 
-                $buildPlanBuilder = new TES5BuildPlanBuilder(unserialize(file_get_contents('app/graph')));
+                $buildPlanBuilder = new TES5BuildPlanBuilder(unserialize(file_get_contents('app/graph_'.$buildTarget->getTargetName())));
                 $buildPlan = $buildPlanBuilder->createBuildPlan($sourceFiles, $this->threadsNumber);
                 $totalSourceFiles = count($sourceFiles);
 

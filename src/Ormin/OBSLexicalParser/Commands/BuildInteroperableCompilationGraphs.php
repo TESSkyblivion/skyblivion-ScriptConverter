@@ -30,7 +30,9 @@ class BuildInteroperableCompilationGraphs extends Command
     {
         $this
             ->setName('skyblivion:parser:buildGraphs')
-            ->setDescription('Build graphs of scripts which are interconnected to be transpiled together');
+            ->setDescription('Build graphs of scripts which are interconnected to be transpiled together')
+            ->addArgument('target', InputArgument::OPTIONAL, "The build target", "Standalone");
+
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -38,7 +40,7 @@ class BuildInteroperableCompilationGraphs extends Command
 
         set_time_limit(10800);
 
-        $target = 'Standalone';
+        $target = $input->getArgument('target');
         $errorLog = fopen("graph_error_log","w+");
         $log = fopen("graph_debug_log","w+");
         $buildTarget = BuildTargetFactory::get($target);
@@ -136,7 +138,7 @@ class BuildInteroperableCompilationGraphs extends Command
 
         $progressBar->end();
         $graph = new TES5ScriptDependencyGraph($dependencyGraph, $usageGraph);
-        file_put_contents('app/graph',serialize($graph));
+        file_put_contents('app/graph_'.$buildTarget->getTargetName(),serialize($graph));
         fclose($errorLog);
         fclose($log);
     }
