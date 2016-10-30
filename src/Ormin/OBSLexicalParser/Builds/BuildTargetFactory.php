@@ -14,6 +14,19 @@ use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
 class BuildTargetFactory
 {
 
+    public static function getCollection($targetsString)
+    {
+        $targets = explode(",",$targetsString);
+        $collection = new BuildTargetCollection();
+        foreach($targets as $k => $v)
+        {
+            $collection->add(static::get(trim($targets[$v])));
+        }
+
+        return $collection;
+
+    }
+
     public static function get($target)
     {
 

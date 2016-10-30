@@ -30,7 +30,7 @@ class BuildInteroperableCompilationGraphs extends Command
         $this
             ->setName('skyblivion:parser:buildGraphs')
             ->setDescription('Build graphs of scripts which are interconnected to be transpiled together')
-            ->addArgument('target', InputArgument::OPTIONAL, "The build target", "Standalone");
+            ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", "Standalone,TIF");
 
     }
 
@@ -39,28 +39,35 @@ class BuildInteroperableCompilationGraphs extends Command
 
         set_time_limit(10800);
 
-        $target = $input->getArgument('target');
+        $targets = $input->getArgument('targets');
         $errorLog = fopen("graph_error_log","w+");
         $log = fopen("graph_debug_log","w+");
-        $buildTarget = BuildTargetFactory::get($target);
+        $buildTargets = BuildTargetFactory::getCollection($targets);
 
-        if(!$buildTarget->canBuild()) {
-            $output->writeln("Target " . $target . " current build dir not clean, archive it manually.");
+        if(!$buildTargets->canBuild()) {
+            $output->writeln("Targets current build dir not clean, archive it manually.");
             return;
         }
 
-        $sourceFiles = $buildTarget->getSourceFileList();
-        $inferencer = new TES5TypeInferencer(new ESMAnalyzer(new TypeMapper()),$buildTarget->getSourcePath());
+        $sourceFiles = $buildTargets->getSourceFiles();
+        $totalCount = 0;
+
+        foreach($sourceFiles as $sourceBuildFiles) {
+            $totalCount += count($sourceBuildFiles);
+        }
+
+        $inferencer = new TES5TypeInferencer(new ESMAnalyzer(new TypeMapper()),'./BuildTargets/Standalone/Source/');
 
         $dependencyGraph = [];
         $usageGraph = [];
 
-        $progressBar = new CliProgressBar(count($sourceFiles));
+        $progressBar = new CliProgressBar($totalCount);
         $progressBar->display();
 
-        foreach($sourceFiles as $sourceFile) {
+        foreach($sourceFiles as $buildTargetName => $sourceFile) {
 
             try {
+                $buildTarget = $buildTargets->getByName($buildTargetName);
                 $scriptName = substr($sourceFile, 0, -4);
                 $AST = $buildTarget->getAST($buildTarget->getSourceFromPath($scriptName));
 
