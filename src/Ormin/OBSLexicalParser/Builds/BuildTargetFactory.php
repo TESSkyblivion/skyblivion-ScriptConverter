@@ -20,7 +20,7 @@ class BuildTargetFactory
         $collection = new BuildTargetCollection();
         foreach($targets as $k => $v)
         {
-            $collection->add(static::get(trim($targets[$v])));
+            $collection->add(static::get(trim($v)));
         }
 
         return $collection;
@@ -74,7 +74,7 @@ class BuildTargetFactory
             }
 
             default: {
-                throw new \LogicException("Unknown target");
+                throw new \LogicException("Unknown target ".$target);
             }
 
         }

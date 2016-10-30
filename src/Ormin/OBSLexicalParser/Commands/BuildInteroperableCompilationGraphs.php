@@ -52,7 +52,7 @@ class BuildInteroperableCompilationGraphs extends Command
         $sourceFiles = $buildTargets->getSourceFiles();
         $totalCount = 0;
 
-        foreach($sourceFiles as $sourceBuildFiles) {
+        foreach($sourceFiles->getIterator() as $sourceBuildFiles) {
             $totalCount += count($sourceBuildFiles);
         }
 
@@ -64,77 +64,79 @@ class BuildInteroperableCompilationGraphs extends Command
         $progressBar = new CliProgressBar($totalCount);
         $progressBar->display();
 
-        foreach($sourceFiles as $buildTargetName => $sourceFile) {
+        foreach($sourceFiles->getIterator() as $buildTargetName => $sourceBuildFiles) {
 
-            try {
-                $buildTarget = $buildTargets->getByName($buildTargetName);
-                $scriptName = substr($sourceFile, 0, -4);
-                $AST = $buildTarget->getAST($buildTarget->getSourceFromPath($scriptName));
+            foreach($sourceBuildFiles as $sourceFile) {
+                try {
+                    $buildTarget = $buildTargets->getByName($buildTargetName);
+                    $scriptName = substr($sourceFile, 0, -4);
+                    $AST = $buildTarget->getAST($buildTarget->getSourceFromPath($scriptName));
 
-                /**
-                 * @var TES4ObjectProperty[] $propertiesAccesses
-                 */
-                $propertiesAccesses = [];
-                $AST->filter(function ($data) use (&$propertiesAccesses) {
+                    /**
+                     * @var TES4ObjectProperty[] $propertiesAccesses
+                     */
+                    $propertiesAccesses = [];
+                    $AST->filter(function ($data) use (&$propertiesAccesses) {
 
-                    if($data instanceof TES4ObjectProperty) {
-                        $propertiesAccesses[] = $data;
-                    }
+                        if ($data instanceof TES4ObjectProperty) {
+                            $propertiesAccesses[] = $data;
+                        }
 
-                });
+                    });
 
-                /**
-                 * @var TES5Property[] $preparedProperties
-                 */
-                $preparedProperties = [];
-                /**
-                 * @var TES5Type[] $preparedPropertiesTypes
-                 */
+                    /**
+                     * @var TES5Property[] $preparedProperties
+                     */
+                    $preparedProperties = [];
+                    /**
+                     * @var TES5Type[] $preparedPropertiesTypes
+                     */
 
-                $preparedPropertiesTypes = [];
-                foreach($propertiesAccesses as $property) {
-                    preg_match("#([0-9a-zA-Z]+)\.([0-9a-zA-Z]+)#i", $property->getData(), $matches);
-                    $propertyName = $matches[1];
-                    $propertyKeyName = strtolower($propertyName);
-                    if (!isset($preparedProperties[$propertyKeyName])) {
-                        $preparedProperty = new TES5Property($propertyName, TES5BasicType::T_FORM(), $matches[1]);
-                        $preparedProperties[$propertyKeyName] = $preparedProperty;
-                        $inferencingType = $inferencer->resolveInferenceTypeByReferenceEdid($preparedProperty);
-                        $preparedPropertiesTypes[$propertyKeyName] = $inferencingType;
-                    } else {
-                        $preparedProperty = $preparedProperties[$propertyKeyName];
-                        $inferencingType = $inferencer->resolveInferenceTypeByReferenceEdid($preparedProperty);
-                        if($inferencingType != $preparedPropertiesTypes[$propertyKeyName]) {
-                            throw new ConversionException("Cannot settle up the properties types - conflict.");
+                    $preparedPropertiesTypes = [];
+                    foreach ($propertiesAccesses as $property) {
+                        preg_match("#([0-9a-zA-Z]+)\.([0-9a-zA-Z]+)#i", $property->getData(), $matches);
+                        $propertyName = $matches[1];
+                        $propertyKeyName = strtolower($propertyName);
+                        if (!isset($preparedProperties[$propertyKeyName])) {
+                            $preparedProperty = new TES5Property($propertyName, TES5BasicType::T_FORM(), $matches[1]);
+                            $preparedProperties[$propertyKeyName] = $preparedProperty;
+                            $inferencingType = $inferencer->resolveInferenceTypeByReferenceEdid($preparedProperty);
+                            $preparedPropertiesTypes[$propertyKeyName] = $inferencingType;
+                        } else {
+                            $preparedProperty = $preparedProperties[$propertyKeyName];
+                            $inferencingType = $inferencer->resolveInferenceTypeByReferenceEdid($preparedProperty);
+                            if ($inferencingType != $preparedPropertiesTypes[$propertyKeyName]) {
+                                throw new ConversionException("Cannot settle up the properties types - conflict.");
+                            }
                         }
                     }
-                }
 
-                fwrite($log, $scriptName." - ".count($preparedProperties)." prepared".PHP_EOL);
+                    fwrite($log, $scriptName . " - " . count($preparedProperties) . " prepared" . PHP_EOL);
 
-                foreach($preparedProperties as $preparedPropertyKey => $preparedProperty) {
+                    foreach ($preparedProperties as $preparedPropertyKey => $preparedProperty) {
 
-                    //Only keys are lowercased.
-                    $lowerPropertyType = strtolower($preparedPropertiesTypes[$preparedPropertyKey]->value());
-                    $lowerScriptType = strtolower($scriptName);
+                        //Only keys are lowercased.
+                        $lowerPropertyType = strtolower($preparedPropertiesTypes[$preparedPropertyKey]->value());
+                        $lowerScriptType = strtolower($scriptName);
 
-                    if(!isset($dependencyGraph[$lowerPropertyType])) {
-                        $dependencyGraph[$lowerPropertyType] = [];
+                        if (!isset($dependencyGraph[$lowerPropertyType])) {
+                            $dependencyGraph[$lowerPropertyType] = [];
+                        }
+                        $dependencyGraph[$lowerPropertyType][] = $lowerScriptType;
+
+                        if (!isset($usageGraph[$lowerScriptType])) {
+                            $usageGraph[$lowerScriptType] = [];
+                        }
+
+                        $usageGraph[$lowerScriptType][] = $lowerPropertyType;
+                        fwrite($log, 'Registering a dependency from ' . $scriptName . ' to ' . $preparedPropertiesTypes[$preparedPropertyKey]->value() . PHP_EOL);
                     }
-                    $dependencyGraph[$lowerPropertyType][] = $lowerScriptType;
+                    $progressBar->progress();
 
-                    if(!isset($usageGraph[$lowerScriptType])) {
-                        $usageGraph[$lowerScriptType] = [];
-                    }
-
-                    $usageGraph[$lowerScriptType][] = $lowerPropertyType;
-                    fwrite($log,'Registering a dependency from '.$scriptName.' to '.$preparedPropertiesTypes[$preparedPropertyKey]->value().PHP_EOL);
+                } catch (\Exception $e) {
+                    fwrite($errorLog, $sourceFile . PHP_EOL . $e->getMessage());
+                    continue;
                 }
-                $progressBar->progress();
-
-            } catch(\Exception $e) {
-                fwrite($errorLog, $sourceFile.PHP_EOL.$e->getMessage());
-                continue;
             }
         }
 
