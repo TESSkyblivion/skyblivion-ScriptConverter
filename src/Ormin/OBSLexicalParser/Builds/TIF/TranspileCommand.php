@@ -51,7 +51,7 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
 
     public function initialize()
     {
-        $parser = new \Ormin\OBSLexicalParser\TES4\Parser\SyntaxErrorCleanParser(new \Ormin\OBSLexicalParser\TES4\Parser\TES4OBScriptGrammar());
+        $parser = new \Ormin\OBSLexicalParser\TES4\Parser\SyntaxErrorCleanParser(new \Ormin\OBSLexicalParser\TES4\Parser\TES4ObscriptCodeGrammar());
         $typeMapper = new TypeMapper();
         $analyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
         $primitiveValueFactory = new TES5PrimitiveValueFactory();
