@@ -31,6 +31,20 @@ class BuildTargetCollection implements \IteratorAggregate
         return $result;
     }
 
+    public function getUniqueBuildFingerprint()
+    {
+        $myBuildTargets = $this->buildTargets;
+        ksort($myBuildTargets);
+
+        $md5 = md5("randomseed");
+        foreach($myBuildTargets as $k => $v) {
+            $md5 = md5($md5, $k);
+        }
+
+        return $md5;
+
+    }
+
     public function getByName($name)
     {
         if(!isset($this->buildTargets[$name]))

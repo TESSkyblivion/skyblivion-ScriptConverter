@@ -140,7 +140,7 @@ class BuildInteroperableCompilationGraphs extends Command
 
         $progressBar->end();
         $graph = new TES5ScriptDependencyGraph($dependencyGraph, $usageGraph);
-        file_put_contents('app/graph_'.$buildTarget->getTargetName(),serialize($graph));
+        file_put_contents('app/graph_'.$buildTargets->getUniqueBuildFingerprint(),serialize($graph));
         fclose($errorLog);
         fclose($log);
     }

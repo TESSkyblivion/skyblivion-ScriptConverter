@@ -4,7 +4,6 @@ namespace Ormin\OBSLexicalParser\Commands;
 
 use Dariuszp\CliProgressBar;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
-use Ormin\OBSLexicalParser\Builds\TES5BuildPlanBuilder;
 use Ormin\OBSLexicalParser\Commands\Dispatch\ArchiveBuildJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\CompileScriptJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\PrepareWorkspaceJob;
@@ -139,7 +138,7 @@ class BuildTargetCommand extends Command
 
 
         } catch (\LogicException $e) {
-            $output->writeln("Unknown target " . $target . ", exiting.");
+            $output->writeln("Unknown target, exiting.");
             return;
         } catch (\Exception $e) {
             var_dump($e->getMessage());
