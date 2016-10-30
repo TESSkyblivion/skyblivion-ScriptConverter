@@ -38,7 +38,7 @@ class BuildTargetCollection implements \IteratorAggregate
 
         $md5 = md5("randomseed");
         foreach($myBuildTargets as $k => $v) {
-            $md5 = md5($md5, $k);
+            $md5 = md5($md5 . $k);
         }
 
         return $md5;
