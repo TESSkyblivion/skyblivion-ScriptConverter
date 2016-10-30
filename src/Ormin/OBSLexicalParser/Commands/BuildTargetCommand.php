@@ -42,11 +42,7 @@ class BuildTargetCommand extends Command
 
             $buildTarget = BuildTargetFactory::get($target);
 
-            if (
-                (count(array_slice(scandir($buildTarget->getWorkspacePath()), 2)) > 0) ||
-                (count(array_slice(scandir($buildTarget->getTranspiledPath()), 2))) > 0 ||
-                (count(array_slice(scandir($buildTarget->getArtifactsPath()), 2))) > 0
-            ) {
+            if (!$buildTarget->canBuild()) {
                 $output->writeln("Target " . $target . " current build dir not clean, archive it manually.");
                 return;
             }
@@ -58,11 +54,8 @@ class BuildTargetCommand extends Command
 
                 $errorLog = fopen($buildTarget->getErrorLogPath(), "w+");
 
-                $sourceFiles = array_slice(scandir($buildTarget->getSourcePath()), 2);
-
-                $buildPlanBuilder = new TES5BuildPlanBuilder(unserialize(file_get_contents('app/graph_'.$buildTarget->getTargetName())));
-                $buildPlan = $buildPlanBuilder->createBuildPlan($sourceFiles, $this->threadsNumber);
-                $totalSourceFiles = count($sourceFiles);
+                $buildPlan = $buildTarget->getBuildPlan($this->threadsNumber);
+                $totalSourceFiles = count($buildTarget->getSourceFileList());
 
 
                 $progressBar = new CliProgressBar($totalSourceFiles);

@@ -174,4 +174,53 @@ class BuildTarget
         return "./BuildTargets/" . $this->getTargetName();
     }
 
+    public function canBuild()
+    {
+        return !(
+            (count(array_slice(scandir($this->getWorkspacePath()), 2)) > 0) ||
+            (count(array_slice(scandir($this->getTranspiledPath()), 2))) > 0 ||
+            (count(array_slice(scandir($this->getArtifactsPath()), 2))) > 0
+        );
+    }
+
+    /**
+     * Plan the build against N workers
+     * @param integer $workers
+     * @return array
+     */
+    public function getBuildPlan($workers)
+    {
+        $sourceFiles = $this->getSourceFileList();
+        $buildPlanBuilder = new TES5BuildPlanBuilder(unserialize(file_get_contents('app/graph_'.$this->getTargetName())));
+        $buildPlan = $buildPlanBuilder->createBuildPlan($sourceFiles, $workers);
+        return $buildPlan;
+    }
+
+    /**
+     * Get the sources file list
+     * @return array
+     */
+    public function getSourceFileList()
+    {
+        $fileList = array_slice(scandir($this->getSourcePath()), 2);
+        $sourcePaths = [];
+
+        foreach($fileList as $file) {
+
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+            /**
+             * Only files without extension or .txt are considered sources
+             * You can add metadata next to those files, but they cannot have those extensions.
+             */
+            if($extension == "" || $extension == "txt") {
+                $sourcePaths[] = $file;
+            }
+
+        }
+
+        return $sourcePaths;
+
+    }
+
 } 

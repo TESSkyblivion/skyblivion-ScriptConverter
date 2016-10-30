@@ -19,7 +19,6 @@ use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ormin\OBSLexicalParser\TES5\Types\TES5Type;
 
@@ -45,16 +44,12 @@ class BuildInteroperableCompilationGraphs extends Command
         $log = fopen("graph_debug_log","w+");
         $buildTarget = BuildTargetFactory::get($target);
 
-        if (
-            (count(array_slice(scandir($buildTarget->getWorkspacePath()), 2)) > 0) ||
-            (count(array_slice(scandir($buildTarget->getTranspiledPath()), 2))) > 0 ||
-            (count(array_slice(scandir($buildTarget->getArtifactsPath()), 2))) > 0
-        ) {
+        if(!$buildTarget->canBuild()) {
             $output->writeln("Target " . $target . " current build dir not clean, archive it manually.");
             return;
         }
 
-        $sourceFiles = array_slice(scandir($buildTarget->getSourcePath()), 2);
+        $sourceFiles = $buildTarget->getSourceFileList();
         $inferencer = new TES5TypeInferencer(new ESMAnalyzer(new TypeMapper()),$buildTarget->getSourcePath());
 
         $dependencyGraph = [];
