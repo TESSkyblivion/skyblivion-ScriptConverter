@@ -30,6 +30,9 @@ class BuildTarget
      */
     private $compileCommand;
 
+    /**
+     * @var ASTCommand
+     */
     private $ASTCommand;
 
     /**
@@ -38,7 +41,7 @@ class BuildTarget
      */
     private $nameTransformer;
 
-    public function __construct($targetName, TranspileCommand $transpileCommand, CompileCommand $compileCommand, TES5NameTransformer $nameTransformer, ASTCommand $ASTCommand = null)
+    public function __construct($targetName, TranspileCommand $transpileCommand, CompileCommand $compileCommand, TES5NameTransformer $nameTransformer, ASTCommand $ASTCommand)
     {
         $this->transpileInitialized = false;
         $this->compileInitialized = false;

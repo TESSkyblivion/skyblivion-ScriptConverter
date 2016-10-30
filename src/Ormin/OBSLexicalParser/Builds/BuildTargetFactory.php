@@ -35,7 +35,8 @@ class BuildTargetFactory
                     'TIF',
                     new \Ormin\OBSLexicalParser\Builds\TIF\TranspileCommand(),
                     new \Ormin\OBSLexicalParser\Builds\TIF\CompileCommand(),
-                    new TES5NameTransformer()
+                    new TES5NameTransformer(),
+                    new \Ormin\OBSLexicalParser\Builds\TIF\ASTCommand()
                 );
             }
 
@@ -44,7 +45,8 @@ class BuildTargetFactory
                     'PF',
                     new \Ormin\OBSLexicalParser\Builds\PF\TranspileCommand(),
                     new \Ormin\OBSLexicalParser\Builds\PF\CompileCommand(),
-                    new TES5NameTransformer()
+                    new TES5NameTransformer(),
+                    new \Ormin\OBSLexicalParser\Builds\PF\ASTCommand()
                 );
             }
 
@@ -53,7 +55,8 @@ class BuildTargetFactory
                     'QF',
                     new \Ormin\OBSLexicalParser\Builds\QF\TranspileCommand(),
                     new \Ormin\OBSLexicalParser\Builds\QF\CompileCommand(),
-                    new TES5NameTransformer()
+                    new TES5NameTransformer(),
+                    new \Ormin\OBSLexicalParser\Builds\QF\ASTCommand()
                 );
             }
 
