@@ -78,7 +78,13 @@ class TES5BuildPlanBuilder
 
                 $preparedChunks[] = $preparedMappedChunk;
             } else {
-                $nonpairedScripts[] = $preparedChunk[0];
+                $nonpairedChunkScript = $preparedChunk[0];
+                $nonpairedScripts[] = $nonpairedChunkScript;
+                $nonpairedChunkScriptKey = strtolower($nonpairedChunkScript);
+                if(isset($codeScripts[$nonpairedChunkScriptKey]))
+                {
+                    unset($codeScripts[$nonpairedChunkScriptKey]);
+                }
             }
 
             if(count($codeScripts) >= $previousCount) {
