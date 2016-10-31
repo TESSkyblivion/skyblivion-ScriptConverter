@@ -44,7 +44,7 @@ class BuildInteroperableCompilationGraphs extends Command
         $targets = $input->getArgument('targets');
         $errorLog = fopen("graph_error_log","w+");
         $log = fopen("graph_debug_log","w+");
-        $build = new Build("./Build"); //This argument might well not be important in this case
+        $build = new Build(Build::DEFAULT_BUILD_PATH); //This argument might well not be important in this case
         $buildTargets = BuildTargetFactory::getCollection($targets, $build);
 
         if(!$buildTargets->canBuild()) {

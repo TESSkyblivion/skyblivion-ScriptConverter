@@ -28,7 +28,7 @@ class BuildTargetCommand extends Command
             ->setDescription('Create artifact[s] from OBScript source')
             ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", BuildTarget::DEFAULT_TARGETS)
             ->addArgument('threadsNumber', InputArgument::OPTIONAL, "Threads number", 4)
-            ->addArgument('buildPath', InputArgument::OPTIONAL, "Build folder", './Build/');
+            ->addArgument('buildPath', InputArgument::OPTIONAL, "Build folder", Build::DEFAULT_BUILD_PATH);
 
     }
 

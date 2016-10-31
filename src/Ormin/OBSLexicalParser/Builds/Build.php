@@ -10,6 +10,7 @@ namespace Ormin\OBSLexicalParser\Builds;
 
 class Build
 {
+    const DEFAULT_BUILD_PATH = "./Build/";
 
     private $buildPath;
 
