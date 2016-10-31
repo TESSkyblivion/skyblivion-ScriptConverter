@@ -43,6 +43,7 @@ class TES5BuildPlanBuilder
         $preparedChunks = [];
         $nonpairedScripts = [];
 
+        $previousCount = count($codeScripts);
         /**
          * Prepare chunks of scripts and push lone scripts into a different array
          */
@@ -78,6 +79,12 @@ class TES5BuildPlanBuilder
                 $preparedChunks[] = $preparedMappedChunk;
             } else {
                 $nonpairedScripts[] = $preparedChunk[0];
+            }
+
+            if(count($codeScripts) >= $previousCount) {
+                throw new \LogicException("Error in planning build, circuit breaker on.");
+            } else {
+                $previousCount = count($codeScripts);
             }
 
         }

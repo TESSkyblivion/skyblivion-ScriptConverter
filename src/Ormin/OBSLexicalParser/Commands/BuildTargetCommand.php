@@ -157,7 +157,7 @@ class BuildTargetCommand extends Command
 
 
         } catch (\LogicException $e) {
-            $output->writeln("Unknown target, exiting.");
+            $output->writeln($e->getMessage());
             return;
         } catch (\Exception $e) {
             var_dump($e->getMessage());
