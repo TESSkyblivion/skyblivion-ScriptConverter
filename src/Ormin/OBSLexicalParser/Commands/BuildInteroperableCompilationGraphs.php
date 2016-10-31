@@ -7,6 +7,7 @@
 namespace Ormin\OBSLexicalParser\Commands;
 
 use Dariuszp\CliProgressBar;
+use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 use Ormin\OBSLexicalParser\TES4\AST\Value\ObjectAccess\TES4ObjectProperty;
@@ -43,7 +44,8 @@ class BuildInteroperableCompilationGraphs extends Command
         $targets = $input->getArgument('targets');
         $errorLog = fopen("graph_error_log","w+");
         $log = fopen("graph_debug_log","w+");
-        $buildTargets = BuildTargetFactory::getCollection($targets);
+        $build = new Build("./Build"); //This argument might well not be important in this case
+        $buildTargets = BuildTargetFactory::getCollection($targets, $build);
 
         if(!$buildTargets->canBuild()) {
             $output->writeln("Targets current build dir not clean, archive it manually.");
