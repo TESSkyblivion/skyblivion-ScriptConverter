@@ -13,7 +13,7 @@ use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetCollection;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 
-class CompileScriptJob extends \Threaded
+class CompileScriptJob
 {
 
     /**
