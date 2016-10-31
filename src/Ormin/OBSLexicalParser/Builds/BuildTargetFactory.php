@@ -9,6 +9,7 @@
 namespace Ormin\OBSLexicalParser\Builds;
 
 
+use Ormin\OBSLexicalParser\Builds\Service\FragmentsParsingService;
 use Ormin\OBSLexicalParser\Builds\Service\StandaloneParsingService;
 use Ormin\OBSLexicalParser\TES4\Parser\SyntaxErrorCleanParser;
 use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
@@ -53,11 +54,16 @@ class BuildTargetFactory
             }
 
             case 'TIF': {
+                $fragmentsParsingService = new FragmentsParsingService(
+                    new SyntaxErrorCleanParser(new \Ormin\OBSLexicalParser\TES4\Parser\TES4OBScriptGrammar())
+                );
+
+
                 return new BuildTarget(
                     'TIF',
                     $build,
                     new TES5NameTransformer(),
-                    new \Ormin\OBSLexicalParser\Builds\TIF\TranspileCommand(),
+                    new \Ormin\OBSLexicalParser\Builds\TIF\TranspileCommand($fragmentsParsingService),
                     new \Ormin\OBSLexicalParser\Builds\TIF\CompileCommand(),
                     new \Ormin\OBSLexicalParser\Builds\TIF\ASTCommand(),
                     new \Ormin\OBSLexicalParser\Builds\TIF\BuildScopeCommand()
