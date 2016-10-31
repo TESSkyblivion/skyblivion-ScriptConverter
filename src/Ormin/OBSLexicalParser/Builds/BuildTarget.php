@@ -198,7 +198,7 @@ class BuildTarget
              * Only files without extension or .txt are considered sources
              * You can add metadata next to those files, but they cannot have those extensions.
              */
-            if($extension == "" || $extension == "txt") {
+            if($extension == "txt") {
                 $sourcePaths[] = $file;
             }
 

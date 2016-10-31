@@ -92,12 +92,7 @@ class BuildTargetCommand extends Command
 
                     $promise->watch(function ($data) use ($progressBar, $errorLog) {
 
-                        $count = 0;
-                        foreach($data['scripts'] as $build => $scripts) {
-                            $count += count($scripts);
-                        }
-
-                        $progressBar->progress($count);
+                        $progressBar->progress(1);
 
                         if (isset($data['exception'])) {
                             $flattenedScripts = "";
