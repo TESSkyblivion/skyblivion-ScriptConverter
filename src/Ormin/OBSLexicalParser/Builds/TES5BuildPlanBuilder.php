@@ -140,7 +140,7 @@ class TES5BuildPlanBuilder
 
                 $threadBuckets[$bucketKey][] = $eveningChunk;
                 //Not sure if should be here but prolly yes?
-                $threadBucketsSizes[$bucketKey] += $neededScripts;
+                $threadBucketsSizes[$bucketKey] += count($nonpairedScripts);
                 $nonpairedScripts = [];
                 break;
             }
@@ -180,7 +180,7 @@ class TES5BuildPlanBuilder
 
 
             $singleScriptChunk[$chunkScriptBuild][] = $nonpairedScript;
-            $restChunks[$restChunkBucket] = $singleScriptChunk;
+            $restChunks[$restChunkBucket][] = $singleScriptChunk;
 
             $restChunkBucket++;
             if($restChunkBucket == $threads) {
@@ -189,8 +189,10 @@ class TES5BuildPlanBuilder
 
         }
 
-        foreach($restChunks as $bucketKey => $restOfScriptsChunk) {
-            $threadBuckets[$bucketKey][] = $restOfScriptsChunk;
+        foreach($restChunks as $bucketKey => $restOfScriptsChunks) {
+            foreach($restOfScriptsChunks as $restOfScriptsChunk) {
+                $threadBuckets[$bucketKey][] = $restOfScriptsChunk;
+            }
         }
 
         return $threadBuckets;
