@@ -105,7 +105,7 @@ class BuildTargetCommand extends Command
                                 $flattenedScripts .= implode(', ', $scripts);
                             }
 
-                            fwrite($errorLog, implode(', ',$flattenedScripts).PHP_EOL.$data['exception']);
+                            fwrite($errorLog, $flattenedScripts.PHP_EOL.$data['exception']);
                         }
 
                     });
