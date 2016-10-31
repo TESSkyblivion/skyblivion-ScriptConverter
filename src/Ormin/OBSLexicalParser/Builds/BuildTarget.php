@@ -25,6 +25,11 @@ class BuildTarget
     private $targetName;
 
     /**
+     * @var string
+     */
+    private $filePrefix;
+
+    /**
      * @var Build
      */
     private $build;
@@ -56,6 +61,7 @@ class BuildTarget
     private $nameTransformer;
 
     public function __construct($targetName,
+                                $filePrefix,
                                 Build $build,
                                 TES5NameTransformer $nameTransformer,
                                 TranspileCommand $transpileCommand,
@@ -69,6 +75,7 @@ class BuildTarget
         $this->scopeInitialized = false;
         $this->targetName = $targetName;
         $this->build = $build;
+        $this->filePrefix = $filePrefix;
         $this->transpileCommand = $transpileCommand;
         $this->compileCommand = $compileCommand;
         $this->nameTransformer = $nameTransformer;
@@ -159,16 +166,30 @@ class BuildTarget
         return $this->build->getWorkspacePath() . $scriptName . ".psc";
     }
 
+    public function getTranspiledPath()
+    {
+        return $this->build->getBuildPath() . "/Transpiled/".$this->targetName."/";
+    }
+
+    public function getArtifactsPath()
+    {
+        return $this->build->getBuildPath() . "/Artifacts/".$this->targetName."/";
+    }
+
+    public function getWorkspacePath()
+    {
+        return $this->build->getWorkspacePath();
+    }
+
     public function getTranspileToPath($scriptName)
     {
-        $prefix = "TES4";
-        $transformedName = $this->nameTransformer->transform($scriptName, "TES4");
-        return $this->build->getTranspiledPath() . $prefix . $transformedName . ".psc";
+        $transformedName = $this->nameTransformer->transform($scriptName, $this->filePrefix);
+        return $this->getTranspiledPath() . $this->filePrefix . $transformedName . ".psc";
     }
 
     public function getCompileToPath($scriptName)
     {
-        return $this->build->getArtifactsPath() . $scriptName . ".pex";
+        return $this->getArtifactsPath() . $scriptName . ".pex";
     }
 
     private function getRootBuildTargetPath()
@@ -178,7 +199,14 @@ class BuildTarget
 
     public function canBuild()
     {
-        return $this->build->canBuild();
+        return (
+            !(
+                (count(array_slice(scandir($this->getTranspiledPath()), 2))) > 0 ||
+                (count(array_slice(scandir($this->getArtifactsPath()), 2))) > 0
+            ) &&
+            $this->build->canBuild()
+        );
+
     }
 
     /**

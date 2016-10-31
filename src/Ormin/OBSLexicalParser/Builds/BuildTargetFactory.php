@@ -43,6 +43,7 @@ class BuildTargetFactory
                 
                 return new BuildTarget(
                     'Standalone',
+                    'TES4',
                     $build,
                     new TES5NameTransformer(),
                     new \Ormin\OBSLexicalParser\Builds\Standalone\TranspileCommand($standaloneParsingService),
@@ -61,6 +62,7 @@ class BuildTargetFactory
 
                 return new BuildTarget(
                     'TIF',
+                    '',
                     $build,
                     new TES5NameTransformer(),
                     new \Ormin\OBSLexicalParser\Builds\TIF\TranspileCommand($fragmentsParsingService),
@@ -73,6 +75,7 @@ class BuildTargetFactory
             case 'PF': {
                 return new BuildTarget(
                     'PF',
+                    '',
                     $build,
                     new TES5NameTransformer(),
                     new \Ormin\OBSLexicalParser\Builds\PF\TranspileCommand(),
@@ -85,6 +88,7 @@ class BuildTargetFactory
             case 'QF': {
                 return new BuildTarget(
                     'QF',
+                    '',
                     $build,
                     new TES5NameTransformer(),
                     new \Ormin\OBSLexicalParser\Builds\QF\TranspileCommand(),

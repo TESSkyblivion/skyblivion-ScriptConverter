@@ -10,29 +10,38 @@ namespace Ormin\OBSLexicalParser\Commands\Dispatch;
 
 
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
+use Ormin\OBSLexicalParser\Builds\BuildTargetCollection;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 
 class CompileScriptJob extends \Threaded
 {
 
     /**
-     * @var string
+     * @var BuildTargetCollection
      */
-    private $buildTarget;
+    private $buildTargetCollection;
 
-    public function __construct($buildTarget)
+    private $logPath;
+
+    public function __construct(BuildTargetCollection $buildTargetCollection, $logPath)
     {
-        $this->buildTarget = $buildTarget;
+        $this->buildTargetCollection = $buildTargetCollection;
+        $this->logPath = $logPath;
     }
 
 
     public function run()
     {
-        $buildTarget = BuildTargetFactory::get($this->buildTarget);
-        $compileLog = fopen($buildTarget->getCompileLogPath(), "w+");
-        $logs = $buildTarget->compile($buildTarget->getTranspiledPath(), $buildTarget->getWorkspacePath(), $buildTarget->getArtifactsPath());
-        fwrite($compileLog, $logs);
-        fclose($compileLog);
+
+        /**
+         * @var BuildTarget $buildTarget
+         */
+        foreach($this->buildTargetCollection->getIterator() as $buildTarget) {
+            $compileLog = fopen($this->logPath, "w+");
+            $logs = $buildTarget->compile($buildTarget->getTranspiledPath(), $buildTarget->getWorkspacePath(), $buildTarget->getArtifactsPath());
+            fwrite($compileLog, $logs);
+            fclose($compileLog);
+        }
     }
 
 }

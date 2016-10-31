@@ -125,12 +125,12 @@ class BuildTargetCommand extends Command
              * @TODO - Create a factory that will provide a PrepareWorkspaceJob based on running system, so we can provide a
              * native implementation for Windows
              */
-            $prepareCommand = new PrepareWorkspaceJob($buildTarget->getTargetName());
+            $prepareCommand = new PrepareWorkspaceJob($buildTargets);
             $prepareCommand->run();
 
             $output->writeln("Workspace prepared...");
 
-            $task = new CompileScriptJob($buildTarget->getTargetName());
+            $task = new CompileScriptJob($buildTargets, $build->getCompileLogPath());
             $task->run();
 
             $output->writeln("Build completed, archiving ...");
@@ -141,8 +141,8 @@ class BuildTargetCommand extends Command
              * @TODO - Create a factory that will provide a PrepareWorkspaceJob based on running system, so we can provide a
              * native implementation for Windows
              */
-            $prepareCommand = new ArchiveBuildJob($buildTarget->getTargetName());
-            $prepareCommand->run();
+            //$prepareCommand = new ArchiveBuildJob($buildTarget->getTargetName());
+            //$prepareCommand->run();
 
 
 
