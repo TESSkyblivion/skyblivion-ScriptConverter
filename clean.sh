@@ -1,5 +1,5 @@
-rm -rf ./BuildTargets/$1/Build/Artifacts/*
-rm -rf ./BuildTargets/$1/Build/Transpiled/*
-rm -rf ./BuildTargets/$1/Build/Workspace/*
-rm -rf ./BuildTargets/$1/Build/compile_log
-rm -rf ./BuildTargets/$1/Build/error_log
+rm -rf ./Build/Artifacts/*
+rm -rf ./Build/Transpiled/*
+rm -rf ./Build/Workspace/*
+rm -rf ./Build/compile_log
+rm -rf ./Build/error_log

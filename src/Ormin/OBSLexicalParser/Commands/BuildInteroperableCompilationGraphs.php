@@ -7,6 +7,7 @@
 namespace Ormin\OBSLexicalParser\Commands;
 
 use Dariuszp\CliProgressBar;
+use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 use Ormin\OBSLexicalParser\TES4\AST\Value\ObjectAccess\TES4ObjectProperty;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
@@ -30,7 +31,7 @@ class BuildInteroperableCompilationGraphs extends Command
         $this
             ->setName('skyblivion:parser:buildGraphs')
             ->setDescription('Build graphs of scripts which are interconnected to be transpiled together')
-            ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", "Standalone,TIF");
+            ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", BuildTarget::DEFAULT_TARGETS);
 
     }
 
@@ -50,11 +51,7 @@ class BuildInteroperableCompilationGraphs extends Command
         }
 
         $sourceFiles = $buildTargets->getSourceFiles();
-        $totalCount = 0;
-
-        foreach($sourceFiles->getIterator() as $sourceBuildFiles) {
-            $totalCount += count($sourceBuildFiles);
-        }
+        $totalCount = $buildTargets->getTotalSourceFiles();
 
         $inferencer = new TES5TypeInferencer(new ESMAnalyzer(new TypeMapper()),'./BuildTargets/Standalone/Source/');
 

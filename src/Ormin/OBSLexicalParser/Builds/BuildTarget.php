@@ -5,6 +5,8 @@
  */
 
 namespace Ormin\OBSLexicalParser\Builds;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
 
 
@@ -15,10 +17,17 @@ use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
 class BuildTarget
 {
 
+    const DEFAULT_TARGETS = "Standalone,TIF";
+
     /**
      * @var string
      */
     private $targetName;
+
+    /**
+     * @var Build
+     */
+    private $build;
 
     /**
      * @var TranspileCommand
@@ -36,25 +45,39 @@ class BuildTarget
     private $ASTCommand;
 
     /**
+     * @var BuildScopeCommand
+     */
+    private $buildScopeCommand;
+
+    /**
      * Needed for proper resolution of filename
      * @var TES5NameTransformer
      */
     private $nameTransformer;
 
-    public function __construct($targetName, TranspileCommand $transpileCommand, CompileCommand $compileCommand, TES5NameTransformer $nameTransformer, ASTCommand $ASTCommand)
+    public function __construct($targetName,
+                                Build $build,
+                                TES5NameTransformer $nameTransformer,
+                                TranspileCommand $transpileCommand,
+                                CompileCommand $compileCommand,
+                                ASTCommand $ASTCommand,
+                                BuildScopeCommand $buildScopeCommand)
     {
         $this->transpileInitialized = false;
         $this->compileInitialized = false;
         $this->ASTInitialized = false;
+        $this->scopeInitialized = false;
         $this->targetName = $targetName;
+        $this->build = $build;
         $this->transpileCommand = $transpileCommand;
         $this->compileCommand = $compileCommand;
         $this->nameTransformer = $nameTransformer;
         $this->ASTCommand = $ASTCommand;
+        $this->buildScopeCommand = $buildScopeCommand;
     }
 
 
-    public function transpile($sourcePath, $outputPath)
+    public function transpile($sourcePath, $outputPath, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $compilingScope)
     {
 
         if (!$this->transpileInitialized) {
@@ -62,7 +85,7 @@ class BuildTarget
             $this->transpileInitialized = true;
         }
 
-        return $this->transpileCommand->transpile($sourcePath, $outputPath);
+        return $this->transpileCommand->transpile($sourcePath, $outputPath, $globalScope, $compilingScope);
     }
 
     public function compile($sourcePath, $workspacePath, $outputPath)
@@ -87,6 +110,15 @@ class BuildTarget
         return $this->ASTCommand->getAST($sourcePath);
     }
 
+    public function buildScope($sourcePath)
+    {
+        if (!$this->scopeInitialized) {
+            $this->buildScopeCommand->initialize();
+            $this->scopeInitialized = true;
+        }
+
+        return $this->buildScopeCommand->buildScope($sourcePath);
+    }
 
     /**
      * @return string
@@ -107,11 +139,6 @@ class BuildTarget
         return $this->getRootBuildTargetPath() . "/Dependencies/";
     }
 
-    public function getBuildPath()
-    {
-        return $this->getRootBuildTargetPath() . "/Build/";
-    }
-
     public function getArchivePath()
     {
         return $this->getRootBuildTargetPath() . "/Archive/";
@@ -122,31 +149,6 @@ class BuildTarget
         return $this->getRootBuildTargetPath() . "/Archive/" . $buildNumber . "/";
     }
 
-    public function getErrorLogPath()
-    {
-        return $this->getBuildPath() . "error_log";
-    }
-
-    public function getCompileLogPath()
-    {
-        return $this->getBuildPath() . "compile_log";
-    }
-
-    public function getWorkspacePath()
-    {
-        return $this->getBuildPath() . "Workspace/";
-    }
-
-    public function getTranspiledPath()
-    {
-        return $this->getBuildPath() . "Transpiled/";
-    }
-
-    public function getArtifactsPath()
-    {
-        return $this->getBuildPath() . "Artifacts/";
-    }
-
     public function getSourceFromPath($scriptName)
     {
         return $this->getSourcePath() . $scriptName . ".txt";
@@ -154,19 +156,19 @@ class BuildTarget
 
     public function getWorkspaceFromPath($scriptName)
     {
-        return $this->getWorkspacePath() . $scriptName . ".psc";
+        return $this->build->getWorkspacePath() . $scriptName . ".psc";
     }
 
     public function getTranspileToPath($scriptName)
     {
         $prefix = "TES4";
         $transformedName = $this->nameTransformer->transform($scriptName, "TES4");
-        return $this->getTranspiledPath() . $prefix . $transformedName . ".psc";
+        return $this->build->getTranspiledPath() . $prefix . $transformedName . ".psc";
     }
 
     public function getCompileToPath($scriptName)
     {
-        return $this->getArtifactsPath() . $scriptName . ".pex";
+        return $this->build->getArtifactsPath() . $scriptName . ".pex";
     }
 
     private function getRootBuildTargetPath()
@@ -176,24 +178,7 @@ class BuildTarget
 
     public function canBuild()
     {
-        return !(
-            (count(array_slice(scandir($this->getWorkspacePath()), 2)) > 0) ||
-            (count(array_slice(scandir($this->getTranspiledPath()), 2))) > 0 ||
-            (count(array_slice(scandir($this->getArtifactsPath()), 2))) > 0
-        );
-    }
-
-    /**
-     * Plan the build against N workers
-     * @param integer $workers
-     * @return array
-     */
-    public function getBuildPlan($workers)
-    {
-        $sourceFiles = $this->getSourceFileList();
-        $buildPlanBuilder = new TES5BuildPlanBuilder(unserialize(file_get_contents('app/graph_'.$this->getTargetName())));
-        $buildPlan = $buildPlanBuilder->createBuildPlan($sourceFiles, $workers);
-        return $buildPlan;
+        return $this->build->canBuild();
     }
 
     /**

@@ -6,8 +6,12 @@
 
 namespace Ormin\OBSLexicalParser\Builds\TIF;
 
+use Ormin\OBSLexicalParser\Builds\Service\FragmentsParsingService;
 use Ormin\OBSLexicalParser\Input\FragmentsReferencesBuilder;
+use Ormin\OBSLexicalParser\TES4\AST\TES4FragmentTarget;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\Context\TypeMapper;
 use Ormin\OBSLexicalParser\TES5\Converter\TES4ToTES5ASTTIFFragmentConverter;
 use Ormin\OBSLexicalParser\TES5\Converter\TES5AdditionalBlockChangesPass;
@@ -35,9 +39,9 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
 {
 
     /**
-     * @var \Ormin\OBSLexicalParser\TES4\Parser\SyntaxErrorCleanParser
+     * @var FragmentsParsingService
      */
-    private $parser;
+    private $parsingService;
 
     /**
      * @var TES4ToTES5ASTTIFFragmentConverter
@@ -49,9 +53,13 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
      */
     private $fragmentsReferenceBuilder;
 
+    public function __construct(FragmentsParsingService $fragmentsParsingService)
+    {
+        $this->parsingService = $fragmentsParsingService;
+    }
+
     public function initialize()
     {
-        $parser = new \Ormin\OBSLexicalParser\TES4\Parser\SyntaxErrorCleanParser(new \Ormin\OBSLexicalParser\TES4\Parser\TES4ObscriptCodeGrammar());
         $typeMapper = new TypeMapper();
         $analyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
         $primitiveValueFactory = new TES5PrimitiveValueFactory();
@@ -90,28 +98,21 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
         );
 
 
-        $this->parser = $parser;
         $this->converter = $converter;
         $this->fragmentsReferenceBuilder = new FragmentsReferencesBuilder();
 
     }
 
 
-    public function transpile($sourcePaths, $outputPaths)
+    public function transpile($sourcePath, $outputPath, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
 
-        foreach ($sourcePaths as $k => $sourcePath) {
-            $lexer = new \Ormin\OBSLexicalParser\TES4\Lexer\FragmentLexer();
-            $tokens = $lexer->lex(file_get_contents($sourcePath));
-            $AST = $this->parser->parse($tokens);
-            $scriptName = basename($sourcePath, substr($sourcePath, -4, 4));
-            $referencesPath = substr($sourcePath, 0, -4);
-            $variableList = $this->fragmentsReferenceBuilder->buildVariableDeclarationList($referencesPath);
-            $convertedScript = $this->converter->convert($scriptName, $outputPaths[$k], $variableList, $AST);
-            file_put_contents($convertedScript->getOutputPath(), $convertedScript->getScript()->output());
-            passthru('lua "Utilities/beautifier.lua" "' . $convertedScript->getOutputPath() . '"');
+        $AST = $this->parsingService->parseScript($sourcePath);
+        $scriptName = basename($sourcePath, ".".pathinfo($sourcePath, PATHINFO_EXTENSION));
+        $convertedScript = $this->converter->convert(new TES4FragmentTarget($AST, $outputPath), $scriptName, $outputPath);
+        file_put_contents($convertedScript->getOutputPath(), $convertedScript->getScript()->output());
+        passthru('lua "Utilities/beautifier.lua" "' . $convertedScript->getOutputPath() . '"');
 
-        }
 
     }
 

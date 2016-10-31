@@ -101,7 +101,7 @@ class TES5AdditionalBlockChangesPass {
             case "gamemode":
             case 'scripteffectupdate':
             {
-                $onInitLocalScope = $this->blockLocalScopeFactory->createFromBlockType("OnInit", $globalScope);
+                $onInitLocalScope = $this->blockLocalScopeFactory->createFromBlockType("OnInit");
                 $newInitBlock = new TES5EventCodeBlock("OnInit",$onInitLocalScope,$this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($onInitLocalScope)));
                 $args = new TES5ObjectCallArguments();
                 $args->add(new TES5Float(self::ON_UPDATE_TICK));
@@ -115,7 +115,7 @@ class TES5AdditionalBlockChangesPass {
             }
 
             case "onactivate": {
-                $onInitLocalScope = $this->blockLocalScopeFactory->createFromBlockType("OnInit", $globalScope);
+                $onInitLocalScope = $this->blockLocalScopeFactory->createFromBlockType("OnInit");
                 $newInitBlock = new TES5EventCodeBlock("OnInit",$onInitLocalScope,$this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($onInitLocalScope)));
 
                 $function = $this->valueFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "BlockActivation", $multipleScriptsScope);

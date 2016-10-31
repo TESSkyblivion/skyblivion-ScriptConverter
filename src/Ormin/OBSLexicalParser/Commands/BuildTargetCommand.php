@@ -3,6 +3,8 @@
 namespace Ormin\OBSLexicalParser\Commands;
 
 use Dariuszp\CliProgressBar;
+use Ormin\OBSLexicalParser\Builds\Build;
+use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 use Ormin\OBSLexicalParser\Commands\Dispatch\ArchiveBuildJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\CompileScriptJob;
@@ -11,7 +13,6 @@ use Ormin\OBSLexicalParser\Commands\Dispatch\TranspileChunkJob;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Amp\Promise;
 
@@ -25,8 +26,9 @@ class BuildTargetCommand extends Command
         $this
             ->setName('skyblivion:parser:build')
             ->setDescription('Create artifact[s] from OBScript source')
-            ->addArgument('target', InputArgument::REQUIRED, "The build target")
-            ->addArgument('threadsNumber', InputArgument::OPTIONAL, "Threads number", 4);
+            ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", BuildTarget::DEFAULT_TARGETS)
+            ->addArgument('threadsNumber', InputArgument::OPTIONAL, "Threads number", 4)
+            ->addArgument('buildPath', InputArgument::OPTIONAL, "Build folder", './Build/');
 
     }
 
@@ -36,33 +38,39 @@ class BuildTargetCommand extends Command
 
         try {
 
-            $target = $input->getArgument('target');
+            $targets = $input->getArgument('targets');
             $this->threadsNumber = $input->getArgument('threadsNumber');
 
-            $buildTarget = BuildTargetFactory::get($target);
+            $buildPath = $input->getArgument('buildPath');
+            $build = new Build($buildPath);
+            $buildTargets = BuildTargetFactory::getCollection($targets, $build);
 
-            if (!$buildTarget->canBuild()) {
-                $output->writeln("Target " . $target . " current build dir not clean, archive it manually.");
+            if (!$buildTargets->canBuild()) {
+                $output->writeln("Targets current build dir not clean, archive them manually or run ./clean.sh.");
                 return;
             }
 
             $output->writeln("Starting transpiling reactor using " . $this->threadsNumber . " threads...");
 
             $reactor = \Amp\reactor();
-            $reactor->run(function () use ($buildTarget, $output, $reactor) {
+            $reactor->run(function () use ($build, $buildPath, $buildTargets, $output, $reactor) {
 
-                $errorLog = fopen($buildTarget->getErrorLogPath(), "w+");
+                $errorLog = fopen($build->getErrorLogPath(), "w+");
 
-                $buildPlan = $buildTarget->getBuildPlan($this->threadsNumber);
-                $totalSourceFiles = count($buildTarget->getSourceFileList());
-
+                $buildPlan = $buildTargets->getBuildPlan($this->threadsNumber);
+                $totalSourceFiles = $buildTargets->getTotalSourceFiles();
 
                 $progressBar = new CliProgressBar($totalSourceFiles);
                 $progressBar->display();
 
                 $promises = [];
                 foreach ($buildPlan as $threadBuildPlan) {
-                    $task = new TranspileChunkJob($buildTarget->getTargetName(), $threadBuildPlan);
+
+                    /**
+                     * We had some problems with sharing objects inside the jobs, so thats why we pass the path.
+                     * Maybe later we can just inject Build and it will be nice and clean :)
+                     */
+                    $task = new TranspileChunkJob($buildPath, $threadBuildPlan);
 
                     $deferred = new \Amp\Deferred;
 
@@ -83,10 +91,21 @@ class BuildTargetCommand extends Command
 
 
                     $promise->watch(function ($data) use ($progressBar, $errorLog) {
-                        $progressBar->progress(count($data['scripts']));
+
+                        $count = 0;
+                        foreach($data['scripts'] as $build => $scripts) {
+                            $count += count($scripts);
+                        }
+
+                        $progressBar->progress($count);
 
                         if (isset($data['exception'])) {
-                            fwrite($errorLog, implode(', ',$data['scripts']).PHP_EOL.$data['exception']);
+                            $flattenedScripts = "";
+                            foreach($data['scripts'] as $build => $scripts) {
+                                $flattenedScripts .= implode(', ', $scripts);
+                            }
+
+                            fwrite($errorLog, implode(', ',$flattenedScripts).PHP_EOL.$data['exception']);
                         }
 
                     });

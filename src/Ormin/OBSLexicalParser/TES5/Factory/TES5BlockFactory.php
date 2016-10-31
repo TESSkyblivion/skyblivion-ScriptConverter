@@ -228,7 +228,7 @@ class TES5BlockFactory
         }
 
         $newBlockType = $this->mapBlockType($blockType);
-        $blockLocalScope = $this->blockLocalScopeFactory->createFromBlockType($newBlockType, $globalScope);
+        $blockLocalScope = $this->blockLocalScopeFactory->createFromBlockType($newBlockType);
 
         $newBlock = new TES5EventCodeBlock($newBlockType, $blockLocalScope, $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope)));
 

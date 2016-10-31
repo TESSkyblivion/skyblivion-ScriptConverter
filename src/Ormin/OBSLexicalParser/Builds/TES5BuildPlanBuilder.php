@@ -23,36 +23,61 @@ class TES5BuildPlanBuilder
         $this->graph = $graph;
     }
 
-    public function createBuildPlan($scripts, $threads = 4) {
-        $lowerScripts = [];
-        foreach($scripts as $k => $v) {
-            $scripts[$k] = substr($v,0,-4);
-            $lowerScripts[$k] = strtolower($scripts[$k]);
+    public function createBuildPlan(BuildSourceFilesCollection $scripts, $threads = 4) {
+        $codeScripts = [];
+        /**
+         * Mapping script names to build names
+         */
+        $scriptToBuild = [];
+
+        foreach($scripts->getIterator() as $buildName => $buildScripts)
+        {
+            foreach($buildScripts as $k => $v) {
+                $scriptName = substr($v,0,-4);
+                $scriptNameKey = strtolower($scriptName);
+                $codeScripts[$scriptNameKey] = $scriptName;
+                $scriptToBuild[$scriptNameKey] = $buildName;
+            }
         }
 
         $preparedChunks = [];
         $nonpairedScripts = [];
 
-        while(count($scripts) > 0) {
-            $currentScript = current($scripts);
-
+        /**
+         * Prepare chunks of scripts and push lone scripts into a different array
+         */
+        while(count($codeScripts) > 0) {
+            $currentScript = current($codeScripts);
 
             $preparedChunk = $this->graph->getScriptsToCompile($currentScript);
 
             if(count($preparedChunk) > 1) {
-                $preparedChunks[] = $preparedChunk;
+
+                /**
+                 * Chunk mapped per-build
+                 */
+                $preparedMappedChunk = [];
+
+                foreach($preparedChunk as $chunkScript) {
+
+                    $chunkScriptKey = strtolower($chunkScript);
+                    if(isset($codeScripts[$chunkScriptKey]))
+                    {
+                        unset($codeScripts[$chunkScriptKey]);
+                    }
+
+
+                    if(!isset($preparedMappedChunk[$scriptToBuild[$chunkScriptKey]])) {
+                        $preparedMappedChunk[$scriptToBuild[$chunkScriptKey]] = [];
+                    }
+
+                    $preparedMappedChunk[$scriptToBuild[$chunkScriptKey]][] = $chunkScript;
+
+                }
+
+                $preparedChunks[] = $preparedMappedChunk;
             } else {
                 $nonpairedScripts[] = $preparedChunk[0];
-            }
-
-            foreach($preparedChunk as $chunkScript) {
-
-
-                $key = array_search(strtolower($chunkScript), $lowerScripts);
-                if($key !== false) {
-                    unset($scripts[$key]);
-                    unset($lowerScripts[$key]);
-                }
             }
 
         }
@@ -68,7 +93,11 @@ class TES5BuildPlanBuilder
             }
 
             $threadBuckets[$bucket][] = $chunk;
-            $threadBucketsSizes[$bucket] += count($chunk);
+
+            foreach($chunk as $chunkBuild => $chunkScripts) {
+                $threadBucketsSizes[$bucket] += count($chunkScripts);
+            }
+
             ++$bucket;
             if($bucket == $threads) {
                 $bucket = 0;
@@ -81,23 +110,64 @@ class TES5BuildPlanBuilder
         foreach($threadBuckets as $bucketKey => $bucket) {
             $bucketSize = $threadBucketsSizes[$bucketKey];
             $neededScripts = $biggestBucket - $bucketSize;
+            $eveningChunk = [];
+
             if($neededScripts >= count($nonpairedScripts)) {
-                $threadBuckets[$bucketKey][] = $nonpairedScripts;
+                foreach($nonpairedScripts as $nonpairedScript) {
+
+                    $chunkScriptBuild = $scriptToBuild[strtolower($nonpairedScript)];
+
+                    if(!isset($eveningChunk[$chunkScriptBuild]))
+                    {
+                        $eveningChunk[$chunkScriptBuild] = [];
+                    }
+
+                    $eveningChunk[$chunkScriptBuild][] = $nonpairedScript;
+                }
+
+                $threadBuckets[$bucketKey][] = $eveningChunk;
+                //Not sure if should be here but prolly yes?
+                $threadBucketsSizes[$bucketKey] += $neededScripts;
+                $nonpairedScripts = [];
                 break;
             }
 
-            $threadBuckets[$bucketKey][] = array_slice($nonpairedScripts, 0, $neededScripts);
+            $sliceOfNonpairedScripts = array_slice($nonpairedScripts, 0, $neededScripts);
+
+            foreach($sliceOfNonpairedScripts as $sliceOfNonpairedScript) {
+
+                $chunkScriptBuild = $scriptToBuild[strtolower($sliceOfNonpairedScript)];
+
+                if(!isset($eveningChunk[$chunkScriptBuild]))
+                {
+                    $eveningChunk[$chunkScriptBuild] = [];
+                }
+
+                $eveningChunk[$chunkScriptBuild][] = $sliceOfNonpairedScript;
+            }
+
+            $threadBuckets[$bucketKey][] = $eveningChunk;
             $threadBucketsSizes[$bucketKey] += $neededScripts;
             $nonpairedScripts = array_slice($nonpairedScripts, $neededScripts);
 
         }
 
-
         $restChunks = [];
         $restChunkBucket = 0;
 
         foreach($nonpairedScripts as $nonpairedScript) {
-            $restChunks[$restChunkBucket][] = [$nonpairedScript];
+
+            $singleScriptChunk = [];
+            $chunkScriptBuild = $scriptToBuild[strtolower($nonpairedScript)];
+
+            if(!isset($singleScriptChunk[$chunkScriptBuild]))
+            {
+                $singleScriptChunk[$chunkScriptBuild] = [];
+            }
+
+
+            $singleScriptChunk[$chunkScriptBuild][] = $nonpairedScript;
+            $restChunks[$restChunkBucket] = $singleScriptChunk;
 
             $restChunkBucket++;
             if($restChunkBucket == $threads) {
@@ -106,9 +176,8 @@ class TES5BuildPlanBuilder
 
         }
 
-        foreach($restChunks as $bucketKey => $restOfScripts) {
-            $threadBuckets[$bucketKey] = array_merge($threadBuckets[$bucketKey],$restOfScripts);
-            $threadBucketsSizes[$bucketKey] += count($restOfScripts);
+        foreach($restChunks as $bucketKey => $restOfScriptsChunk) {
+            $threadBuckets[$bucketKey][] = $restOfScriptsChunk;
         }
 
         return $threadBuckets;

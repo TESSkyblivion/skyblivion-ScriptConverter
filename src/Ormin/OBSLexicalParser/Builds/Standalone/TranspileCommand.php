@@ -6,9 +6,10 @@
 
 namespace Ormin\OBSLexicalParser\Builds\Standalone;
 
-use Ormin\OBSLexicalParser\TES4\AST\TES4ScriptCollection;
+use Ormin\OBSLexicalParser\TES4\AST\TES4Target;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
-use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\Context\TypeMapper;
 use Ormin\OBSLexicalParser\TES5\Converter\TES4ToTES5ASTConverter;
 use Ormin\OBSLexicalParser\TES5\Converter\TES5AdditionalBlockChangesPass;
@@ -31,23 +32,28 @@ use Ormin\OBSLexicalParser\TES5\Factory\TES5VariableAssignationFactory;
 use Ormin\OBSLexicalParser\TES5\Service\MetadataLogService;
 use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
 use Ormin\OBSLexicalParser\TES5\Service\TES5TypeInferencer;
+use Ormin\OBSLexicalParser\Builds\Service\StandaloneParsingService;
 
 class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileCommand
 {
 
     /**
-     * @var \Ormin\OBSLexicalParser\TES4\Parser\SyntaxErrorCleanParser
+     * @var StandaloneParsingService
      */
-    private $parser;
+    private $parserService;
 
     /**
      * @var \Ormin\OBSLexicalParser\TES5\Converter\TES4ToTES5ASTConverter
      */
     private $converter;
 
+    public function __construct(StandaloneParsingService $standaloneParsingService)
+    {
+        $this->parserService = $standaloneParsingService;
+    }
+
     public function initialize()
     {
-        $parser = new \Ormin\OBSLexicalParser\TES4\Parser\SyntaxErrorCleanParser(new \Ormin\OBSLexicalParser\TES4\Parser\TES4OBScriptGrammar());
         $typeMapper = new TypeMapper();
         $analyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
         $primitiveValueFactory = new TES5PrimitiveValueFactory();
@@ -89,34 +95,19 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
             new TES5NameTransformer()
         );
 
-
-        $this->parser = $parser;
         $this->converter = $converter;
 
     }
 
 
-    public function transpile($sourcePaths, $outputPaths)
+    public function transpile($sourcePath, $outputPath, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
-        $ASTCollection = new TES4ScriptCollection();
+        $tes4Target = new TES4Target($this->parserService->parseScript($sourcePath), $outputPath);
 
-        foreach ($sourcePaths as $k => $sourcePath) {
-            $lexer = new \Ormin\OBSLexicalParser\TES4\Lexer\ScriptLexer();
-            $tokens = $lexer->lex(file_get_contents($sourcePath));
-            $ASTCollection->add($this->parser->parse($tokens), $outputPaths[$k]);
 
-        }
-
-        $TES5ASTCollection = $this->converter->convert($ASTCollection);
-
-        /**
-         * @var TES5Target $target
-         */
-        foreach ($TES5ASTCollection->getIterator() as $target) {
-            file_put_contents($target->getOutputPath(), $target->getScript()->output());
-            passthru('lua "Utilities/beautifier.lua" "' . $target->getOutputPath() . '"');
-
-        }
+        $target = $this->converter->convert($tes4Target, $globalScope, $multipleScriptsScope);
+        file_put_contents($target->getOutputPath(), $target->getScript()->output());
+        passthru('lua "Utilities/beautifier.lua" "' . $target->getOutputPath() . '"');
 
     }
 

@@ -66,6 +66,32 @@ class BuildTargetCollection implements \IteratorAggregate
         return $collection;
     }
 
+    public function getTotalSourceFiles()
+    {
+        $totalCount = 0;
+        $sourceFiles = $this->getSourceFiles();
+        foreach($sourceFiles->getIterator() as $sourceBuildFiles) {
+            $totalCount += count($sourceBuildFiles);
+        }
+        
+        return $totalCount;
+    }
+
+
+    /**
+     * Plan the build against N workers
+     * @param integer $workers
+     * @return array
+     */
+    public function getBuildPlan($workers)
+    {
+        $sourceFiles = $this->getSourceFiles();
+        $buildPlanBuilder = new TES5BuildPlanBuilder(unserialize(file_get_contents('app/graph_'.$this->getUniqueBuildFingerprint())));
+        $buildPlan = $buildPlanBuilder->createBuildPlan($sourceFiles, $workers);
+        return $buildPlan;
+    }
+
+
     public function getIterator()
     {
         return new \ArrayIterator($this->buildTargets);
