@@ -7,8 +7,6 @@
 
 namespace Ormin\OBSLexicalParser\Builds\Standalone;
 
-
-use Ormin\OBSLexicalParser\Input\FragmentsReferencesBuilder;
 use Ormin\OBSLexicalParser\TES4\AST\TES4Script;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
@@ -33,11 +31,6 @@ class BuildScopeCommand implements \Ormin\OBSLexicalParser\Builds\BuildScopeComm
     private $nameTransformer;
 
     /**
-     * @var FragmentsReferencesBuilder
-     */
-    private $fragmentsReferencesBuilder;
-
-    /**
      * @var TES5PropertiesFactory
      */
     private $propertiesFactory;
@@ -57,7 +50,6 @@ class BuildScopeCommand implements \Ormin\OBSLexicalParser\Builds\BuildScopeComm
         $typeMapper = new TypeMapper();
         $this->esmAnalyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
         $this->nameTransformer = new TES5NameTransformer();
-        $this->fragmentsReferencesBuilder = new FragmentsReferencesBuilder();
         $this->propertiesFactory = new TES5PropertiesFactory();
     }
 
@@ -78,8 +70,7 @@ class BuildScopeCommand implements \Ormin\OBSLexicalParser\Builds\BuildScopeComm
     {
         $parsedScript = $this->standaloneParsingService->parseScript($scriptPath);
         $scriptHeader = $this->createHeader($parsedScript);
-        $referencesPath = pathinfo($scriptPath, PATHINFO_FILENAME).".references";
-        $variableList = $this->fragmentsReferencesBuilder->buildVariableDeclarationList($referencesPath);
+        $variableList = $parsedScript->getVariableDeclarationList();
 
         $globalScope = new TES5GlobalScope($scriptHeader);
 
