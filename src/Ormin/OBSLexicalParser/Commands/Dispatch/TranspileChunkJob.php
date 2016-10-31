@@ -16,7 +16,7 @@ use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5StaticGlobalScopesFactory;
 
-class TranspileChunkJob extends \Threaded
+class TranspileChunkJob
 {
 
     /**
@@ -127,7 +127,7 @@ class TranspileChunkJob extends \Threaded
 
         if($result === null)
         {
-            throw new \LogicException("Unknown build");
+            throw new \LogicException("Unknown build ".$targetName);
         }
 
         return $result;
