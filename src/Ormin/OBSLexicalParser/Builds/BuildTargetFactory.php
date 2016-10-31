@@ -55,7 +55,7 @@ class BuildTargetFactory
 
             case 'TIF': {
                 $fragmentsParsingService = new FragmentsParsingService(
-                    new SyntaxErrorCleanParser(new \Ormin\OBSLexicalParser\TES4\Parser\TES4OBScriptGrammar())
+                    new SyntaxErrorCleanParser(new \Ormin\OBSLexicalParser\TES4\Parser\TES4ObscriptCodeGrammar())
                 );
 
 
