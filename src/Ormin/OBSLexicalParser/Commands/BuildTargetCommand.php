@@ -95,12 +95,7 @@ class BuildTargetCommand extends Command
                         $progressBar->progress(1);
 
                         if (isset($data['exception'])) {
-                            $flattenedScripts = "";
-                            foreach($data['scripts'] as $build => $scripts) {
-                                $flattenedScripts .= implode(', ', $scripts);
-                            }
-
-                            fwrite($errorLog, $flattenedScripts.PHP_EOL.$data['exception']);
+                            fwrite($errorLog, $data['script'].PHP_EOL.$data['exception']);
                         }
 
                     });

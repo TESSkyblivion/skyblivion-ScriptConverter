@@ -100,9 +100,9 @@ class TranspileChunkJob
 
                     try {
                         $buildTarget->transpile($sourcePath, $outputPath, $globalScope, $multipleScriptsScope);
-                        $this->updateWorker($deferred, true,$buildChunk);
+                        $this->updateWorker($deferred, true,  $buildScript);
                     } catch (\Exception $e) {
-                        $this->updateWorker($deferred, false,$buildChunk,get_class($e) . PHP_EOL . $e->getMessage() . PHP_EOL);
+                        $this->updateWorker($deferred, false, $buildScript,get_class($e) . PHP_EOL . $e->getMessage() . PHP_EOL);
                     }
                 }
             }
@@ -134,9 +134,9 @@ class TranspileChunkJob
 
     }
 
-    protected function updateWorker(\Amp\Deferred $deferred, $success, $scripts, $exception = null) {
+    protected function updateWorker(\Amp\Deferred $deferred, $success, $script, $exception = null) {
 
-        $data = ['success' => $success, 'scripts' => $scripts];
+        $data = ['success' => $success, 'script' => $script];
 
         if($exception !== null) {
             $data['exception'] = $exception;
