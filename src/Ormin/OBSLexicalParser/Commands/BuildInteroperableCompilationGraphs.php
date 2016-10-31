@@ -18,11 +18,11 @@ use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
 use Ormin\OBSLexicalParser\TES5\Graph\TES5ScriptDependencyGraph;
 use Ormin\OBSLexicalParser\TES5\Service\TES5TypeInferencer;
 use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
+use Ormin\OBSLexicalParser\TES5\Types\TES5CustomType;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Ormin\OBSLexicalParser\TES5\Types\TES5Type;
 
 class BuildInteroperableCompilationGraphs extends Command
 {
@@ -88,7 +88,7 @@ class BuildInteroperableCompilationGraphs extends Command
                      */
                     $preparedProperties = [];
                     /**
-                     * @var TES5Type[] $preparedPropertiesTypes
+                     * @var TES5CustomType[] $preparedPropertiesTypes
                      */
 
                     $preparedPropertiesTypes = [];
@@ -115,7 +115,7 @@ class BuildInteroperableCompilationGraphs extends Command
                     foreach ($preparedProperties as $preparedPropertyKey => $preparedProperty) {
 
                         //Only keys are lowercased.
-                        $lowerPropertyType = strtolower($preparedPropertiesTypes[$preparedPropertyKey]->value());
+                        $lowerPropertyType = strtolower($preparedPropertiesTypes[$preparedPropertyKey]->getOriginalName());
                         $lowerScriptType = strtolower($scriptName);
 
                         if (!isset($dependencyGraph[$lowerPropertyType])) {
@@ -128,7 +128,7 @@ class BuildInteroperableCompilationGraphs extends Command
                         }
 
                         $usageGraph[$lowerScriptType][] = $lowerPropertyType;
-                        fwrite($log, 'Registering a dependency from ' . $scriptName . ' to ' . $preparedPropertiesTypes[$preparedPropertyKey]->value() . PHP_EOL);
+                        fwrite($log, 'Registering a dependency from ' . $scriptName . ' to ' . $preparedPropertiesTypes[$preparedPropertyKey]->getOriginalName() . PHP_EOL);
                     }
                     $progressBar->progress();
 

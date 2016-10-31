@@ -29,13 +29,21 @@ class TES5CustomType implements TES5Type {
     private $nativeType;
 
     /**
+     * Original type name
+     * Needed only for compilation graph build.. will be scrapped once this is cleaned up properly.
+     * @var string
+     */
+    private $originalName;
+
+    /**
      * @var string
      */
     private $prefix;
 
-    public function __construct($typeName, $prefix, TES5BasicType $nativeType) {
+    public function __construct($typeName, $prefix, $originalName, TES5BasicType $nativeType) {
         $this->typeName = $typeName;
         $this->prefix = $prefix;
+        $this->originalName = $originalName;
         $qt = new \ReflectionClass(get_class($this));
         $this->constants = $qt->getConstants();
         $this->nativeType = $nativeType;
@@ -67,6 +75,11 @@ class TES5CustomType implements TES5Type {
 
     public function setNativeType(TES5BasicType $basicType) {
         $this->nativeType = $basicType;
+    }
+
+    public function getOriginalName()
+    {
+        return $this->originalName;
     }
 
 } 
