@@ -84,6 +84,13 @@ class BuildTarget
     }
 
 
+    /**
+     * @param $sourcePath
+     * @param $outputPath
+     * @param TES5GlobalScope $globalScope
+     * @param TES5MultipleScriptsScope $compilingScope
+     * @return \Ormin\OBSLexicalParser\TES5\AST\TES5Target
+     */
     public function transpile($sourcePath, $outputPath, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $compilingScope)
     {
 

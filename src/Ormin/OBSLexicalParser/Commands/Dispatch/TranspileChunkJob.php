@@ -14,6 +14,7 @@ use Ormin\OBSLexicalParser\Builds\BuildTargetCollection;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
+use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5StaticGlobalScopesFactory;
 
 class TranspileChunkJob
@@ -87,7 +88,7 @@ class TranspileChunkJob
             }
 
             $multipleScriptsScope = new TES5MultipleScriptsScope($scriptsScopes);
-
+            $convertedScripts = [];
             foreach($buildChunk as $buildTargetName => $buildScripts) {
 
                 foreach ($buildScripts as $buildScript) {
@@ -99,12 +100,22 @@ class TranspileChunkJob
                     $outputPath = $buildTarget->getTranspileToPath($scriptName);
 
                     try {
-                        $buildTarget->transpile($sourcePath, $outputPath, $globalScope, $multipleScriptsScope);
-                        $this->updateWorker($deferred, true,  $buildScript);
+                        $convertedScript = $buildTarget->transpile($sourcePath, $outputPath, $globalScope, $multipleScriptsScope);
+                        $convertedScripts[$buildScript] = $convertedScript;
                     } catch (\Exception $e) {
                         $this->updateWorker($deferred, false, $buildScript,get_class($e) . PHP_EOL . $e->getMessage() . PHP_EOL);
                     }
                 }
+            }
+
+            /**
+             * @var TES5Target $convertedScript
+             */
+            foreach($convertedScripts as $originalScriptName => $convertedScript)
+            {
+                file_put_contents($convertedScript->getOutputPath(), $convertedScript->getScript()->output());
+                passthru('lua "Utilities/beautifier.lua" "' . $convertedScript->getOutputPath() . '"');
+                $this->updateWorker($deferred, true,  $originalScriptName);
             }
 
         }

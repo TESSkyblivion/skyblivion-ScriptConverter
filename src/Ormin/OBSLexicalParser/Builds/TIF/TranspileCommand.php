@@ -109,9 +109,7 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
 
         $AST = $this->parsingService->parseScript($sourcePath);
         $convertedScript = $this->converter->convert(new TES4FragmentTarget($AST, $outputPath), $globalScope, $multipleScriptsScope);
-        file_put_contents($convertedScript->getOutputPath(), $convertedScript->getScript()->output());
-        passthru('lua "Utilities/beautifier.lua" "' . $convertedScript->getOutputPath() . '"');
-
+        return $convertedScript;
 
     }
 
