@@ -56,20 +56,10 @@ class TES5CodeScope implements TES5Outputtable {
         return $this->localScope;
     }
 
-    /**
-     * @return \Ormin\OBSLexicalParser\TES5\AST\Property\TES5LocalVariable[]
-     */
-    public function getVariables()
-    {
-        return $this->localScope->getVariables();
-    }
-
-
     public function findVariableWithMeaning(TES5LocalVariableParameterMeaning $meaning) {
         return $this->localScope->findVariableWithMeaning($meaning);
     }
-
-
+    
     /**
      * @return mixed
      */
@@ -77,15 +67,5 @@ class TES5CodeScope implements TES5Outputtable {
     {
         return $this->codeChunks;
     }
-
-    /**
-     * @param \Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope $localScope
-     */
-    public function setLocalScope($localScope)
-    {
-        $this->localScope = $localScope;
-    }
-
-
 
 } 

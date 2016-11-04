@@ -500,11 +500,10 @@ class TES5ValueFactory
     public function createCodeChunk(TES4Callable $chunk, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
 
-        $localScope = $codeScope->getLocalScope();
         $function = $chunk->getFunction();
 
         $calledOnReference = $this->createCalledOnReferenceOfCalledFunction($chunk, $codeScope, $globalScope, $multipleScriptsScope);
-        $codeChunk = $this->convertFunction($calledOnReference, $function, $codeScope, $globalScope, $multipleScriptsScope, $localScope);
+        $codeChunk = $this->convertFunction($calledOnReference, $function, $codeScope, $globalScope, $multipleScriptsScope);
         $codeChunks = new TES5CodeChunkCollection();
         $codeChunks->add($codeChunk);
 
@@ -538,12 +537,12 @@ class TES5ValueFactory
      * @param TES5CodeScope $codeScope
      * @param TES5GlobalScope $globalScope
      * @param TES5MultipleScriptsScope $multipleScriptsScope
-     * @param TES5LocalScope $localScope
      * @return TES4Function|TES5Filler|\Ormin\OBSLexicalParser\TES5\AST\Expression\TES5ArithmeticExpression|\Ormin\OBSLexicalParser\TES5\AST\Expression\TES5LogicalExpression|\Ormin\OBSLexicalParser\TES5\AST\Expression\TES5TrueBooleanExpression|TES5ObjectCall|TES5ObjectProperty|TES5Reference|TES5SelfReference|TES5Bool
      * @throws \Ormin\OBSLexicalParser\TES5\Exception\ConversionException
      */
-    public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope, TES5LocalScope $localScope)
+    public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
+        $localScope = $codeScope->getLocalScope();
 
         $functionName = $function->getFunctionCall()->getFunctionName();
         $functionArguments = $function->getArguments();
