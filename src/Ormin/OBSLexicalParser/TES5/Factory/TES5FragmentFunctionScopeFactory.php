@@ -17,6 +17,12 @@ use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
 class TES5FragmentFunctionScopeFactory
 {
 
+    /**
+     * @param $fragmentName
+     * @param TES5FragmentType $fragmentType
+     * @return TES5FunctionScope
+     * @throws \Ormin\OBSLexicalParser\TES5\Exception\ConversionException
+     */
     public function createFromFragmentType($fragmentName, TES5FragmentType $fragmentType)
     {
         $localScope = new TES5FunctionScope($fragmentName);

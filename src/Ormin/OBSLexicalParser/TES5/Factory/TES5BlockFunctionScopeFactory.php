@@ -273,8 +273,4 @@ class TES5BlockFunctionScopeFactory
 
     }
 
-    public function createRecursiveScope(TES5LocalScope $parentScope) {
-        return new TES5LocalScope($parentScope);
-    }
-
 } 

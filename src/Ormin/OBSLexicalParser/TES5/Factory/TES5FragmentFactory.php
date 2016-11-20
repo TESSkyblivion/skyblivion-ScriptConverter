@@ -37,15 +37,22 @@ class TES5FragmentFactory
      */
     private $changesPass;
 
+    /**
+     * @var TES5LocalScopeFactory
+     */
+    private $localScopeFactory;
+
     public function __construct(TES5ChainedCodeChunkFactory $chainedCodeChunkFactory,
                                 TES5FragmentFunctionScopeFactory $fragmentLocalScopeFactory,
                                 TES5CodeScopeFactory $codeScopeFactory,
-                                TES5AdditionalBlockChangesPass $changesPass) {
+                                TES5AdditionalBlockChangesPass $changesPass,
+                                TES5LocalScopeFactory $localScopeFactory) {
 
         $this->codeChunkFactory = $chainedCodeChunkFactory;
         $this->fragmentFunctionScopeFactory = $fragmentLocalScopeFactory;
         $this->codeScopeFactory = $codeScopeFactory;
         $this->changesPass = $changesPass;
+        $this->localScopeFactory = $localScopeFactory;
     }
 
     /**
@@ -61,7 +68,7 @@ class TES5FragmentFactory
 
         $fragmentLocalScope = $this->fragmentFunctionScopeFactory->createFromFragmentType($fragmentName, $fragmentType);
 
-        $function = new TES5FunctionCodeBlock(new TES5VoidType(), $fragmentLocalScope, $this->codeScopeFactory->createCodeScope($this->fragmentFunctionScopeFactory->createRecursiveScope($fragmentLocalScope)));
+        $function = new TES5FunctionCodeBlock(new TES5VoidType(), $fragmentLocalScope, $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($fragmentLocalScope)));
 
 
         foreach($chunks->getCodeChunks() as $codeChunk) {

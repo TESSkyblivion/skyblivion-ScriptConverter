@@ -90,11 +90,10 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
 
         $converter = new TES4ToTES5ASTTIFFragmentConverter(
             $analyzer,
-            new TES5FragmentFactory($chainedCodeChunkFactory, new TES5FragmentFunctionScopeFactory(), $codeScopeFactory, new TES5AdditionalBlockChangesPass($valueFactory, $blockLocalScopeFactory, $codeScopeFactory, $expressionFactory, $referenceFactory, $branchFactory, $assignationFactory, $localScopeFactory)),
+            new TES5FragmentFactory($chainedCodeChunkFactory, new TES5FragmentFunctionScopeFactory(), $codeScopeFactory, new TES5AdditionalBlockChangesPass($valueFactory, $blockLocalScopeFactory, $codeScopeFactory, $expressionFactory, $referenceFactory, $branchFactory, $assignationFactory, $localScopeFactory), $localScopeFactory),
             $valueFactory,
             $referenceFactory,
             new TES5PropertiesFactory(),
-            new TES5NameTransformer(),
             new TES5NameTransformer()
         );
 
