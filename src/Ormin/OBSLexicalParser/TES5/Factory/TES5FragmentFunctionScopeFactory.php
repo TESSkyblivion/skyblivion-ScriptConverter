@@ -7,18 +7,19 @@
 namespace Ormin\OBSLexicalParser\TES5\Factory;
 
 
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5FunctionScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Property\TES5LocalVariable;
 use Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning;
 use Ormin\OBSLexicalParser\TES5\Other\TES5FragmentType;
 use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
 
-class TES5FragmentLocalScopeFactory
+class TES5FragmentFunctionScopeFactory
 {
 
-    public function createFromFragmentType(TES5FragmentType $fragmentType)
+    public function createFromFragmentType($fragmentName, TES5FragmentType $fragmentType)
     {
-        $localScope = new TES5LocalScope();
+        $localScope = new TES5FunctionScope($fragmentName);
 
         switch ($fragmentType) {
 

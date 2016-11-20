@@ -24,7 +24,7 @@ use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 class TES5BranchFactory  {
 
     /**
-     * @var TES5BlockLocalScopeFactory
+     * @var TES5LocalScopeFactory
      */
     private $localScopeFactory;
 
@@ -43,7 +43,7 @@ class TES5BranchFactory  {
      */
     private $valueFactory;
 
-    public function __construct(TES5BlockLocalScopeFactory $localScopeFactory, TES5CodeScopeFactory $codeScopeFactory, TES5ValueFactory $valueFactory) {
+    public function __construct(TES5LocalScopeFactory $localScopeFactory, TES5CodeScopeFactory $codeScopeFactory, TES5ValueFactory $valueFactory) {
         $this->localScopeFactory = $localScopeFactory;
         $this->codeScopeFactory = $codeScopeFactory;
         $this->valueFactory = $valueFactory;

@@ -8,6 +8,7 @@ use Ormin\OBSLexicalParser\TES5\AST\Block\TES5BlockList;
 use Ormin\OBSLexicalParser\TES5\AST\Block\TES5EventCodeBlock;
 use Ormin\OBSLexicalParser\TES5\AST\Block\TES5FunctionCodeBlock;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5FunctionScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Script;
@@ -119,13 +120,20 @@ class TES4ToTES5ASTConverter
                  * @var TES5EventCodeBlock $block
                  */
                 foreach ($blocks as $block) {
-                    $function = new TES5FunctionCodeBlock($blockType . "_" . $i, null, $block->getLocalScope(), $block->getCodeScope());
+
+                    $newFunctionScope = new TES5FunctionScope($blockType ."_". $i);
+
+                    foreach($block->getFunctionScope()->getVariables() as $signatureVariable) {
+                        $newFunctionScope->addVariable($signatureVariable);
+                    }
+
+                    $function = new TES5FunctionCodeBlock(null, $newFunctionScope, $block->getCodeScope());
                     $functions[] = $function;
 
                     if ($localScopeArguments === null) {
 
                         $localScopeArguments = new TES5ObjectCallArguments();
-                        foreach ($block->getLocalScope()->getLocalVariables() as $localVariable) {
+                        foreach ($block->getFunctionScope()->getVariables() as $localVariable) {
                             $localScopeArguments->add($this->referenceFactory->createReferenceToVariable($localVariable));
                         }
 
@@ -136,7 +144,7 @@ class TES4ToTES5ASTConverter
                 }
 
                 //Create the proxy block.
-                $proxyBlock = $this->blockFactory->createNewBlock($blockType, clone $block->getLocalScope());
+                $proxyBlock = $this->blockFactory->createNewBlock($blockType, clone $block->getFunctionScope());
 
                 foreach ($functions as $function) {
                     $blockList->add($function);

@@ -21,6 +21,11 @@ use Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning;
 class TES5LocalScope implements TES5Outputtable {
 
     /**
+     * @var TES5FunctionScope
+     */
+    private $functionScope;
+
+    /**
      * @var TES5LocalScope
      */
     private $parentScope;
@@ -30,7 +35,13 @@ class TES5LocalScope implements TES5Outputtable {
      */
     private $variables = [];
 
-    public function __construct($parentScope = null) {
+    /**
+     * TES5LocalScope constructor.
+     * @param TES5FunctionScope $functionScope
+     * @param null $parentScope
+     */
+    public function __construct(TES5FunctionScope $functionScope, $parentScope = null) {
+        $this->functionScope = $functionScope;
         $this->parentScope = $parentScope;
     }
 
@@ -53,6 +64,14 @@ class TES5LocalScope implements TES5Outputtable {
     public function getParentScope()
     {
         return $this->parentScope;
+    }
+
+    /**
+     * @return TES5FunctionScope
+     */
+    public function getFunctionScope()
+    {
+        return $this->functionScope;
     }
 
     /**
@@ -98,6 +117,8 @@ class TES5LocalScope implements TES5Outputtable {
             $scope = $scope->getParentScope();
         } while($scope !== null);
 
+        $variables = array_merge($variables, $this->functionScope->getVariables());
+
         return $variables;
     }
 
@@ -107,20 +128,7 @@ class TES5LocalScope implements TES5Outputtable {
      * @return null|TES5LocalVariable
      */
     public function findVariableWithMeaning(TES5LocalVariableParameterMeaning $meaning) {
-        $variables = $this->getVariables();
-
-        foreach($variables as $variable) {
-            $variableMeanings = $variable->getMeanings();
-
-            foreach($variableMeanings as $variableMeaning) {
-                if($variableMeaning == $meaning) {
-                    return $variable;
-                }
-            }
-        }
-
-        return null;
-
+        return $this->functionScope->findVariableWithMeaning($meaning);
     }
 
 

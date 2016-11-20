@@ -34,7 +34,7 @@ class TES5LocalVariable implements TES5Variable {
      * @param TES5BasicType $type
      * @param TES5LocalVariableParameterMeaning[] $meanings
      */
-    public function __construct($variableName, TES5BasicType $type, array $meanings = null) {
+    public function __construct($variableName, TES5BasicType $type, array $meanings = []) {
         $this->variableName = $variableName;
         $this->type = $type;
         $this->meanings = $meanings;
@@ -45,7 +45,7 @@ class TES5LocalVariable implements TES5Variable {
     }
 
     /**
-     * @return \Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning
+     * @return \Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning[]
      */
     public function getMeanings()
     {
@@ -74,6 +74,8 @@ class TES5LocalVariable implements TES5Variable {
 
     /**
      * Todo - following two methods should not be in this interface but TES5Property interface
+     * This can be easily done, as the logic is the same as in TES5Property - Set the tracked script,
+     * inference information if any available
      * @throws ConversionException
      */
     public function getReferenceEdid() {

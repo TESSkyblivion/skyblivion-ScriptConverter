@@ -14,11 +14,12 @@ use Ormin\OBSLexicalParser\TES5\Context\TypeMapper;
 use Ormin\OBSLexicalParser\TES5\Converter\TES4ToTES5ASTConverter;
 use Ormin\OBSLexicalParser\TES5\Converter\TES5AdditionalBlockChangesPass;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5BlockFactory;
-use Ormin\OBSLexicalParser\TES5\Factory\TES5BlockLocalScopeFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5BlockFunctionScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5BranchFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ChainedCodeChunkFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5CodeScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ExpressionFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5LocalScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5LocalVariableListFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectPropertyFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5PrimitiveValueFactory;
@@ -58,7 +59,7 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
         $analyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
         $primitiveValueFactory = new TES5PrimitiveValueFactory();
         $metadataLogService = new MetadataLogService('TestMetadata');
-        $blockLocalScopeFactory = new TES5BlockLocalScopeFactory();
+        $blockLocalScopeFactory = new TES5BlockFunctionScopeFactory();
         $codeScopeFactory = new TES5CodeScopeFactory();
         $expressionFactory = new TES5ExpressionFactory();
         $typeInferencer = new TES5TypeInferencer($analyzer,'./BuildTargets/Standalone/Source/');
@@ -67,17 +68,18 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
         $assignationFactory = new TES5VariableAssignationFactory($referenceFactory);
         $localVariableFactory = new TES5LocalVariableListFactory();
 
+        $localScopeFactory = new TES5LocalScopeFactory();
 
         $valueFactory = new TES5ValueFactory($referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService);
         $branchFactory = new TES5BranchFactory(
-            $blockLocalScopeFactory,
+            $localScopeFactory,
             $codeScopeFactory,
             $valueFactory
         );
 
         $assignationConversionFactory = new TES5VariableAssignationConversionFactory($referenceFactory, $valueFactory, $assignationFactory, $branchFactory, $expressionFactory, $typeInferencer);
 
-        $returnFactory = new TES5ReturnFactory($valueFactory, $blockLocalScopeFactory);
+        $returnFactory = new TES5ReturnFactory($valueFactory, $referenceFactory, $blockLocalScopeFactory);
 
         $converter = new TES4ToTES5ASTConverter(
             $analyzer,
@@ -85,8 +87,8 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
                 new TES5ChainedCodeChunkFactory($valueFactory, $returnFactory, $assignationConversionFactory, $branchFactory, $localVariableFactory),
                 $blockLocalScopeFactory,
                 $codeScopeFactory,
-                new TES5AdditionalBlockChangesPass($valueFactory, $blockLocalScopeFactory, $codeScopeFactory, $expressionFactory, $referenceFactory, $branchFactory, $assignationFactory)
-
+                new TES5AdditionalBlockChangesPass($valueFactory, $blockLocalScopeFactory, $codeScopeFactory, $expressionFactory, $referenceFactory, $branchFactory, $assignationFactory, $localScopeFactory),
+                $localScopeFactory
             ),
             $valueFactory,
             $referenceFactory,

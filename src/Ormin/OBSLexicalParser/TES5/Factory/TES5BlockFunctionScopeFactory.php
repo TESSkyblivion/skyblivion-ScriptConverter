@@ -6,18 +6,19 @@
 
 namespace Ormin\OBSLexicalParser\TES5\Factory;
 
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5FunctionScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Property\TES5LocalVariable;
 use Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
 use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
 
-class TES5BlockLocalScopeFactory
+class TES5BlockFunctionScopeFactory
 {
 
     public function createFromBlockType($blockType)
     {
-        $localScope = new TES5LocalScope();
+        $localScope = new TES5FunctionScope($blockType);
 
         switch ($blockType) {
 

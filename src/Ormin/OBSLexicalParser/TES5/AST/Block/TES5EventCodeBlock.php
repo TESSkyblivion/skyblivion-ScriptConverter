@@ -9,16 +9,9 @@ namespace Ormin\OBSLexicalParser\TES5\AST\Block;
 
 use Ormin\OBSLexicalParser\TES5\AST\Code\TES5CodeChunk;
 use Ormin\OBSLexicalParser\TES5\AST\Code\TES5CodeScope;
-use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope;
-use Ormin\OBSLexicalParser\TES5\AST\TES5Outputtable;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5FunctionScope;
 
 class TES5EventCodeBlock implements TES5CodeBlock {
-
-
-    /**
-     * @var string
-     */
-    private $blockType;
 
     /**
      * @var TES5CodeScope
@@ -26,13 +19,12 @@ class TES5EventCodeBlock implements TES5CodeBlock {
     private $codeScope;
 
     /**
-     * @var TES5LocalScope
+     * @var TES5FunctionScope
      */
-    private $localScope;
+    private $functionScope;
 
-    public function __construct($blockType, TES5LocalScope $localScope, TES5CodeScope $chunks) {
-        $this->blockType = $blockType;
-        $this->localScope = $localScope;
+    public function __construct(TES5FunctionScope $functionScope, TES5CodeScope $chunks) {
+        $this->functionScope = $functionScope;
         $this->codeScope = $chunks;
     }
 
@@ -40,13 +32,13 @@ class TES5EventCodeBlock implements TES5CodeBlock {
 
         $codeLines = [];
 
-        $localScope = [];
-        foreach($this->localScope->getLocalVariables() as $localVariable) {
-            $localScope[] = $localVariable->getPropertyType()->output().' '.$localVariable->getPropertyName();
+        $functionSignatureFlat = [];
+        foreach($this->functionScope->getVariables() as $localVariable) {
+            $functionSignatureFlat[] = $localVariable->getPropertyType()->output().' '.$localVariable->getPropertyName();
         }
 
-        $localScope = '('.implode(', ',$localScope).')';
-        $codeLines[] = "Event ".$this->blockType.$localScope;
+        $functionSignature = implode(', ',$functionSignatureFlat);
+        $codeLines[] = "Event ".$this->functionScope->getBlockName().'('.$functionSignature.')';
 
         $codeLines = array_merge($codeLines,$this->codeScope->output());
 
@@ -59,7 +51,7 @@ class TES5EventCodeBlock implements TES5CodeBlock {
      */
     public function getBlockType()
     {
-        return $this->blockType;
+        return $this->functionScope->getBlockName();
     }
 
     /**
@@ -85,11 +77,11 @@ class TES5EventCodeBlock implements TES5CodeBlock {
     }
 
     /**
-     * @return \Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope
+     * @return \Ormin\OBSLexicalParser\TES5\AST\Scope\TES5FunctionScope
      */
-    public function getLocalScope()
+    public function getFunctionScope()
     {
-        return $this->localScope;
+        return $this->functionScope;
     }
 
 

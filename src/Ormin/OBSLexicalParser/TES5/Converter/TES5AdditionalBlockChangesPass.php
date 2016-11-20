@@ -21,10 +21,11 @@ use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Bool;
 use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Float;
 use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5None;
 use Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning;
-use Ormin\OBSLexicalParser\TES5\Factory\TES5BlockLocalScopeFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5BlockFunctionScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5BranchFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5CodeScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ExpressionFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5LocalScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ReferenceFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ValueFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5VariableAssignationFactory;
@@ -38,9 +39,9 @@ class TES5AdditionalBlockChangesPass {
     private $valueFactory;
 
     /**
-     * @var TES5BlockLocalScopeFactory
+     * @var TES5BlockFunctionScopeFactory
      */
-    private $blockLocalScopeFactory;
+    private $blockFunctionScopeFactory;
 
     /**
      * @var TES5CodeScopeFactory
@@ -67,20 +68,27 @@ class TES5AdditionalBlockChangesPass {
      */
     private $assignationFactory;
 
+    /**
+     * @var TES5LocalScopeFactory
+     */
+    private $localScopeFactory;
+
     public function __construct(TES5ValueFactory $valueFactory,
-                                TES5BlockLocalScopeFactory $blockLocalScopeFactory,
+                                TES5BlockFunctionScopeFactory $blockFunctionScopeFactory,
                                 TES5CodeScopeFactory $codeScopeFactory,
                                 TES5ExpressionFactory $expressionFactory,
                                 TES5ReferenceFactory $referenceFactory,
                                 TES5BranchFactory $branchFactory,
-                                TES5VariableAssignationFactory $assignationFactory) {
+                                TES5VariableAssignationFactory $assignationFactory,
+                                TES5LocalScopeFactory $localScopeFactory) {
         $this->valueFactory = $valueFactory;
-        $this->blockLocalScopeFactory = $blockLocalScopeFactory;
+        $this->blockFunctionScopeFactory = $blockFunctionScopeFactory;
         $this->codeScopeFactory = $codeScopeFactory;
         $this->expressionFactory = $expressionFactory;
         $this->referenceFactory = $referenceFactory;
         $this->branchFactory = $branchFactory;
         $this->assignationFactory = $assignationFactory;
+        $this->localScopeFactory = $localScopeFactory;
     }
 
     const ON_UPDATE_TICK = 1;
@@ -94,19 +102,19 @@ class TES5AdditionalBlockChangesPass {
      */
     public function modify(TES4CodeBlock $block, TES5EventBlockList $blockList, TES5EventCodeBlock $newBlock, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope) {
 
-        $blockLocalScope = $newBlock->getLocalScope();
+        $blockFunctionScope = $newBlock->getFunctionScope();
 
         switch (strtolower($block->getBlockType())) {
 
             case "gamemode":
             case 'scripteffectupdate':
             {
-                $onInitLocalScope = $this->blockLocalScopeFactory->createFromBlockType("OnInit");
-                $newInitBlock = new TES5EventCodeBlock("OnInit",$onInitLocalScope,$this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($onInitLocalScope)));
+                $onInitFunctionScope = $this->blockFunctionScopeFactory->createFromBlockType("OnInit");
+                $newInitBlock = new TES5EventCodeBlock($onInitFunctionScope,$this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($onInitFunctionScope)));
                 $args = new TES5ObjectCallArguments();
                 $args->add(new TES5Float(self::ON_UPDATE_TICK));
 
-                $function = $this->valueFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "RegisterForUpdate", $multipleScriptsScope, $args);
+                $function = $this->valueFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "RegisterForSingleUpdate", $multipleScriptsScope, $args);
                 $newInitBlock->addChunk($function);
                 $blockList->add($newInitBlock);
 
@@ -115,8 +123,8 @@ class TES5AdditionalBlockChangesPass {
             }
 
             case "onactivate": {
-                $onInitLocalScope = $this->blockLocalScopeFactory->createFromBlockType("OnInit");
-                $newInitBlock = new TES5EventCodeBlock("OnInit",$onInitLocalScope,$this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($onInitLocalScope)));
+                $onInitFunctionScope = $this->blockFunctionScopeFactory->createFromBlockType("OnInit");
+                $newInitBlock = new TES5EventCodeBlock($onInitFunctionScope,$this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($onInitFunctionScope)));
 
                 $function = $this->valueFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "BlockActivation", $multipleScriptsScope);
                 $newInitBlock->addChunk($function);
@@ -144,7 +152,7 @@ class TES5AdditionalBlockChangesPass {
                     $newContainer
                 );
 
-                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope));
+                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
 
                 $outerBranchCode = unserialize(serialize($newBlock->getCodeScope()));
                 $outerBranchCode->getLocalScope()->setParentScope($newCodeScope->getLocalScope());
@@ -177,7 +185,7 @@ class TES5AdditionalBlockChangesPass {
                     TES5ArithmeticExpressionOperator::OPERATOR_NOT_EQUAL(),
                     new TES5None()
                 );
-                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope));
+                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
                 $newCodeScope->getLocalScope()->addVariable(
                     $castedToActor
                 );
@@ -198,7 +206,7 @@ class TES5AdditionalBlockChangesPass {
 
                     $interBranchCode = unserialize(serialize($newBlock->getCodeScope()));
 
-                    $outerBranchCode = $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($newCodeScope->getLocalScope()));
+                    $outerBranchCode = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
                     $interBranchCode->getLocalScope()->setParentScope($outerBranchCode->getLocalScope());
                     $outerBranchCode->add(new TES5Branch(
                         new TES5SubBranch(
@@ -244,7 +252,7 @@ class TES5AdditionalBlockChangesPass {
                     $newContainer
                 );
 
-                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope));
+                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
 
                 $outerBranchCode = unserialize(serialize($newBlock->getCodeScope()));
                 $outerBranchCode->getLocalScope()->setParentScope($newCodeScope->getLocalScope());
@@ -280,7 +288,7 @@ class TES5AdditionalBlockChangesPass {
                     $newContainer
                 );
 
-                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope));
+                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
 
                 $outerBranchCode = unserialize(serialize($newBlock->getCodeScope()));
                 $outerBranchCode->getLocalScope()->setParentScope($newCodeScope->getLocalScope());
@@ -316,7 +324,7 @@ class TES5AdditionalBlockChangesPass {
                     $newContainer
                 );
 
-                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope));
+                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
 
                 $outerBranchCode = unserialize(serialize($newBlock->getCodeScope()));
                 $outerBranchCode->getLocalScope()->setParentScope($newCodeScope->getLocalScope());
@@ -347,7 +355,7 @@ class TES5AdditionalBlockChangesPass {
                     $newContainer
                 );
 
-                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope));
+                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
 
                 $outerBranchCode = unserialize(serialize($newBlock->getCodeScope()));
                 $outerBranchCode->getLocalScope()->setParentScope($newCodeScope->getLocalScope());
@@ -375,7 +383,7 @@ class TES5AdditionalBlockChangesPass {
                 new TES5Bool(true)
             );
 
-            $newCodeScope = $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope));
+            $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
 
             $outerBranchCode = unserialize(serialize($newBlock->getCodeScope()));
             $outerBranchCode->getLocalScope()->setParentScope($newCodeScope->getLocalScope());
