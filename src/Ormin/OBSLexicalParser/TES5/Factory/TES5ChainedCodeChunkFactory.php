@@ -63,7 +63,7 @@ class TES5ChainedCodeChunkFactory implements TES5CodeChunkFactory
 
             case $chunk instanceof TES4Return:
             {
-                $codeChunks = $this->returnFactory->createCodeChunk();
+                $codeChunks = $this->returnFactory->createCodeChunk($codeScope->getLocalScope()->getFunctionScope(), $globalScope, $multipleScriptsScope);
                 break;
             }
 
