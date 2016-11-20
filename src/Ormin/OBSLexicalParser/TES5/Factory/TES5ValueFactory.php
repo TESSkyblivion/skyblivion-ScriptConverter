@@ -939,14 +939,7 @@ class TES5ValueFactory
                 break;
             }
             case "getamountsoldstolen": {
-                //todo maybe recreate the behavior
-                //for now similar thing only
-                $argumentsList = new TES5ObjectCallArguments();
-                $argumentsList->add(new TES5String("Items Stolen"));
-                return $this->createObjectCall(
-                    new TES5StaticReference("Game"), "QueryStat", $multipleScriptsScope, $argumentsList
-                );
-
+                return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
                 break;
             }
             case "getangle": {
@@ -992,8 +985,6 @@ class TES5ValueFactory
                 return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
                 break;
             }
-            //Not done since this point ,rest is like.. manual .
-
             case "getbuttonpressed": {
                 return $this->createReadReference(TES5ReferenceFactory::MESSAGEBOX_VARIABLE_CONST, $globalScope, $multipleScriptsScope, $localScope);
                 break;

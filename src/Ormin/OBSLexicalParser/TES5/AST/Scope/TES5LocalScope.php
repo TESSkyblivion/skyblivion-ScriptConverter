@@ -11,6 +11,13 @@ use Ormin\OBSLexicalParser\TES5\AST\Property\TES5LocalVariable;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Outputtable;
 use Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning;
 
+/**
+ * TES5LocalScope represents a local scope of variables - i.e. the variables which are known in a given scope.
+ * Local scope can have a parent scope ( as in - you can travel local scopes as a linked list from the leafs up to
+ * the root )
+ * Class TES5LocalScope
+ * @package Ormin\OBSLexicalParser\TES5\AST\Scope
+ */
 class TES5LocalScope implements TES5Outputtable {
 
     /**

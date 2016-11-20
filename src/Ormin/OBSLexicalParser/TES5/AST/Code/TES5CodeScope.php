@@ -12,6 +12,12 @@ use Ormin\OBSLexicalParser\TES5\AST\Property\TES5LocalVariable;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Outputtable;
 use Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning;
 
+/**
+ * TES5CodeScope describes scope for given chunks of code. It consists of its variable local scope and chunks that
+ * are put inside this code scope.
+ * Class TES5CodeScope
+ * @package Ormin\OBSLexicalParser\TES5\AST\Code
+ */
 class TES5CodeScope implements TES5Outputtable {
 
     /**
@@ -59,7 +65,7 @@ class TES5CodeScope implements TES5Outputtable {
     public function findVariableWithMeaning(TES5LocalVariableParameterMeaning $meaning) {
         return $this->localScope->findVariableWithMeaning($meaning);
     }
-    
+
     /**
      * @return mixed
      */

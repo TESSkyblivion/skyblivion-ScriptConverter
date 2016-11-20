@@ -110,13 +110,8 @@ class TES5ReferenceFactory
 
             if ($property === null) {
 
-                foreach ($this->special_conversions as $special_conversion_name => $special_type) {
-
-                    if ($special_conversion_name == $referenceName) {
-                        $property = new TES5Property($referenceName, $special_type, $referenceName);
-                        break;
-                    }
-
+                if(isset($this->special_conversions[$referenceName])) {
+                        $property = new TES5Property($referenceName, $this->special_conversions[$referenceName], $referenceName);
                 }
 
                 if ($property === null) {
