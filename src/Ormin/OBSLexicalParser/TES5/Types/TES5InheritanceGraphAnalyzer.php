@@ -4988,6 +4988,11 @@ class TES5InheritanceGraphAnalyzer
                             ),
                         'returnType' => 'bool',
                     ),
+                'IsPCAMurderer' =>
+                    array (
+                        'args' => array (),
+                        'returnType' => 'int'
+                    ),
                 'IsPlayerSungazing' =>
                     array (
                         'args' =>
@@ -6309,6 +6314,12 @@ class TES5InheritanceGraphAnalyzer
                             array (
                             ),
                         'returnType' => 'Scene',
+                    ),
+                'GetDestroyed' =>
+                    array (
+                        'args' =>
+                            array (),
+                        'returnType' => 'int'
                     ),
                 'GetDistance' =>
                     array (
