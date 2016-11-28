@@ -4804,6 +4804,11 @@ class TES5InheritanceGraphAnalyzer
                             ),
                         'returnType' => 'void',
                     ),
+                'GetAmountSoldStolen' =>
+                    array (
+                        'args' => array (),
+                        'returnType' => 'int'
+                    ),
                 'GetForm' =>
                     array (
                         'args' =>
