@@ -26,8 +26,8 @@ class BuildScriptCommand extends Command
         $this
             ->setName('skyblivion:parser:buildScript')
             ->setDescription('Create artifact from OBScript source')
-            ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", BuildTarget::DEFAULT_TARGETS)
             ->addArgument('scriptName', InputArgument::REQUIRED, "Script name")
+            ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", BuildTarget::DEFAULT_TARGETS)
             ->addArgument('buildPath', InputArgument::OPTIONAL, "Build folder", Build::DEFAULT_BUILD_PATH);
 
     }
