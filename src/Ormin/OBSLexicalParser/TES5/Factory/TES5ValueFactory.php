@@ -284,7 +284,7 @@ class TES5ValueFactory
                         case 15:
                         case 17: {
                             //@INCONSISTENCE Wander.. idk how to check it tbh. We return always true. Think about better representation
-                            return new TES5Bool((bool)$expression->getOperator() == TES4ArithmeticExpressionOperator::OPERATOR_EQUAL());
+                            return new TES5Bool((bool)($expression->getOperator() == TES4ArithmeticExpressionOperator::OPERATOR_EQUAL()));
                         }
 
                         default: {
@@ -1740,9 +1740,10 @@ class TES5ValueFactory
             }
             case "ispcamurderer": {
 
-                //Using Legacy TES4 Connector Plugin
-                return $this->objectPropertyFactory->createObjectProperty($multipleScriptsScope, $this->createReadReference("tContainer", $globalScope, $multipleScriptsScope, $localScope), "isMurderer");
-                break;
+                /**
+                 * Added via SKSE plugin
+                 */
+                return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
             }
             case "ispcsleeping": {
 

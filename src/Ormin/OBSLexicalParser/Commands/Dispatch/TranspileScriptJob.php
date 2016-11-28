@@ -2,37 +2,49 @@
 
 namespace Ormin\OBSLexicalParser\Commands\Dispatch;
 
+use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
+use Ormin\OBSLexicalParser\Builds\BuildTargetCollection;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5StaticGlobalScopesFactory;
 use Ormin\OBSLexicalParser\TES5\Graph\TES5ScriptDependencyGraph;
 
 class TranspileScriptJob
 {
 
-    private $dependencyGraph;
+
+    /**
+     * @var BuildTargetCollection
+     */
+    private $buildTargets;
 
     /**
      * @var string
      */
-    private $buildTarget;
+    private $scriptName;
 
-    public function __construct(TES5ScriptDependencyGraph $dependencyGraph, $buildTarget, $script)
+    /**
+     * TranspileScriptJob constructor.
+     * @param BuildTargetCollection $buildTargets
+     * @param $scriptName
+     */
+    public function __construct(BuildTargetCollection $buildTargets, $scriptName)
     {
-        $this->dependencyGraph = $dependencyGraph;
-        $this->buildTarget = $buildTarget;
-        $this->script = $script;
+        $this->buildTargets = $buildTargets;
+        $this->scriptName = $scriptName;
     }
-
 
     public function run()
     {
-        $buildTarget = BuildTargetFactory::get($this->buildTarget);
 
-        $scripts = $this->dependencyGraph->getScriptsToCompile($this->script);
+        $scripts = $this->buildTargets->getScriptsToCompile($this->scriptName);
+        $partitionedScripts = $this->buildTargets->getSourceFiles($scripts);
 
         $sourcePaths = [];
         $outputPaths = [];
 
+
+        
         foreach($scripts as $buildScript) {
 
             $scriptName = pathinfo($buildScript, PATHINFO_FILENAME);

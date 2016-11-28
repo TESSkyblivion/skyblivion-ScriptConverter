@@ -218,9 +218,12 @@ class BuildTarget
 
     /**
      * Get the sources file list
+     * If intersected source files is not null, they will be intersected with build target source files,
+     * otherwise all files will be claimed
+     * @param array|null $intersectedSourceFiles
      * @return array
      */
-    public function getSourceFileList()
+    public function getSourceFileList(array $intersectedSourceFiles = null)
     {
         $fileList = array_slice(scandir($this->getSourcePath()), 2);
         $sourcePaths = [];
@@ -238,6 +241,11 @@ class BuildTarget
             }
 
         }
+
+        if(null !== $intersectedSourceFiles) {
+            $sourcePaths = array_intersect($sourcePaths, $intersectedSourceFiles);
+        }
+
 
         return $sourcePaths;
 

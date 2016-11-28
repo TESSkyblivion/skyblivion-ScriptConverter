@@ -8,8 +8,14 @@
 namespace Ormin\OBSLexicalParser\Builds;
 
 
+use Ormin\OBSLexicalParser\TES5\Graph\TES5ScriptDependencyGraph;
+
 class BuildTargetCollection implements \IteratorAggregate
 {
+    /**
+     * @var TES5ScriptDependencyGraph
+     */
+    private $dependencyGraph;
 
     /**
      * @var BuildTarget[]
@@ -55,12 +61,19 @@ class BuildTargetCollection implements \IteratorAggregate
         return $this->buildTargets[$name];
     }
 
-    public function getSourceFiles()
+    /**
+     * Get source files, assigned per-build target
+     * If intersected source files is not null, they will be intersected with build target source files,
+     * otherwise all files will be claimed
+     * @param array|null $intersectedSourceFiles
+     * @return BuildSourceFilesCollection
+     */
+    public function getSourceFiles(array $intersectedSourceFiles = null)
     {
         $collection = new BuildSourceFilesCollection();
         foreach ($this->buildTargets as $buildTarget)
         {
-            $collection->add($buildTarget, $buildTarget->getSourceFileList());
+            $collection->add($buildTarget, $buildTarget->getSourceFileList($intersectedSourceFiles));
         }
 
         return $collection;
@@ -86,15 +99,31 @@ class BuildTargetCollection implements \IteratorAggregate
     public function getBuildPlan($workers)
     {
         $sourceFiles = $this->getSourceFiles();
-        $buildPlanBuilder = new TES5BuildPlanBuilder(unserialize(file_get_contents('app/graph_'.$this->getUniqueBuildFingerprint())));
+        $buildPlanBuilder = new TES5BuildPlanBuilder($this->getDependencyGraph());
         $buildPlan = $buildPlanBuilder->createBuildPlan($sourceFiles, $workers);
         return $buildPlan;
     }
 
-
     public function getIterator()
     {
         return new \ArrayIterator($this->buildTargets);
+    }
+
+    public function getScriptsToCompile($scriptName)
+    {
+        return $this->getDependencyGraph()->getScriptsToCompile($scriptName);
+    }
+
+    /**
+     * @return TES5ScriptDependencyGraph
+     */
+    private function getDependencyGraph()
+    {
+        if(null === $this->dependencyGraph) {
+            $this->dependencyGraph = unserialize(file_get_contents('app/graph_'.$this->getUniqueBuildFingerprint()));
+        }
+
+        return $this->dependencyGraph;
     }
 
 }

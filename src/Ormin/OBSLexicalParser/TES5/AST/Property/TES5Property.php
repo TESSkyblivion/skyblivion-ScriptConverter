@@ -51,7 +51,7 @@ class TES5Property implements TES5Variable
 
     public function output()
     {
-        $propertyType = ($this->trackedScript !== null) ? $this->trackedScript->getScriptType()->output() : $this->propertyType->output();
+        $propertyType = $this->getPropertyType()->output();
         return [$propertyType . ' Property ' . $this->propertyName . ' Auto'];
     }
 

@@ -6,24 +6,17 @@
 
 namespace Ormin\OBSLexicalParser\Commands;
 
-use Amp\LibeventReactor;
-use Amp\Reactor;
-use Amp\Thread\Dispatcher;
-use Dariuszp\CliProgressBar;
+use Ormin\OBSLexicalParser\Builds\Build;
+use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
-use Ormin\OBSLexicalParser\Commands\Dispatch\ArchiveBuildJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\CompileScriptJob;
-use Ormin\OBSLexicalParser\Commands\Dispatch\LoadAutoloader;
 use Ormin\OBSLexicalParser\Commands\Dispatch\PrepareWorkspaceJob;
-use Ormin\OBSLexicalParser\Commands\Dispatch\TranspileChunkJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\TranspileScriptJob;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Amp\Promise;
 
 class BuildScriptCommand extends Command
 {
@@ -33,8 +26,9 @@ class BuildScriptCommand extends Command
         $this
             ->setName('skyblivion:parser:buildScript')
             ->setDescription('Create artifact from OBScript source')
-            ->addArgument('target', InputArgument::REQUIRED, "The build target")
-            ->addArgument('scriptName', InputArgument::REQUIRED, "Script name");
+            ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", BuildTarget::DEFAULT_TARGETS)
+            ->addArgument('scriptName', InputArgument::REQUIRED, "Script name")
+            ->addArgument('buildPath', InputArgument::OPTIONAL, "Build folder", Build::DEFAULT_BUILD_PATH);
 
     }
 
@@ -44,22 +38,21 @@ class BuildScriptCommand extends Command
 
         try {
 
-            $target = $input->getArgument('target');
+            $targets = $input->getArgument('targets');
             $scriptName = $input->getArgument('scriptName');
 
-            $buildTarget = BuildTargetFactory::get($target);
+            $buildPath = $input->getArgument('buildPath');
+            $build = new Build($buildPath);
+            $buildTargets = BuildTargetFactory::getCollection($targets, $build);
 
-            if (
-                (count(array_slice(scandir($buildTarget->getWorkspacePath()), 2)) > 0) ||
-                (count(array_slice(scandir($buildTarget->getTranspiledPath()), 2))) > 0 ||
-                (count(array_slice(scandir($buildTarget->getArtifactsPath()), 2))) > 0
-            ) {
-                $output->writeln("Target " . $target . " current build dir not clean, archive it manually.");
+
+            if (!$buildTargets->canBuild()) {
+                $output->writeln("Targets current build dir not clean, archive them manually or run ./clean.sh.");
                 return;
             }
 
             try {
-                $task = new TranspileScriptJob(unserialize(file_get_contents('app/graph')),$buildTarget->getTargetName(), $scriptName);
+                $task = new TranspileScriptJob($buildTargets, $scriptName);
                 $task->run();
             } catch (ConversionException $e) {
 
@@ -76,22 +69,22 @@ class BuildScriptCommand extends Command
              * @TODO - Create a factory that will provide a PrepareWorkspaceJob based on running system, so we can provide a
              * native implementation for Windows
              */
-            $prepareCommand = new PrepareWorkspaceJob($buildTarget->getTargetName());
+            $prepareCommand = new PrepareWorkspaceJob($buildTargets);
             $prepareCommand->run();
 
             $output->writeln("Workspace prepared...");
 
-            $task = new CompileScriptJob($buildTarget->getTargetName());
+            $task = new CompileScriptJob($buildTargets, $build->getCompileLogPath());
             $task->run();
 
             $output->writeln("Build completed.");
 
-            $compileLog = file_get_contents($buildTarget->getCompileLogPath());
+            $compileLog = file_get_contents($build->getCompileLogPath());
 
             var_dump($compileLog);
 
         } catch (\LogicException $e) {
-            $output->writeln("Unknown target " . $target . ", exiting.");
+            $output->writeln("LogicException ".$e->getMessage());
             return;
         } catch (\Exception $e) {
             var_dump($e->getMessage());
