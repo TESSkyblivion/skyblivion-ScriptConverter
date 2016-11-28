@@ -1066,8 +1066,9 @@ class TES5ValueFactory
                 break;
             }
             case "getdestroyed": {
-                $functionName = "isActivationBlocked";
-                #               throw new ConversionException("GetDestroyed() is not accessible via Papyrus.");
+                /**
+                 * Handled by SKSE plugin
+                 */
                 return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
                 break;
             }
