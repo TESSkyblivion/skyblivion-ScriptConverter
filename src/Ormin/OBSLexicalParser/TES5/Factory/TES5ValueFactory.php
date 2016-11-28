@@ -939,7 +939,8 @@ class TES5ValueFactory
                 break;
             }
             case "getamountsoldstolen": {
-                return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
+                $calledOn = new TES5StaticReference("Game");
+                return $this->createObjectCall($calledOn, "GetAmountSoldStolen",$multipleScriptsScope);
                 break;
             }
             case "getangle": {
