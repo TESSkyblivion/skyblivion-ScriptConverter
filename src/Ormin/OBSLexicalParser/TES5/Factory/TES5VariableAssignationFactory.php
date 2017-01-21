@@ -25,10 +25,6 @@ class TES5VariableAssignationFactory  {
         $this->referenceFactory = $referenceFactory;
     }
 
-    public function createAssignationFromVariable(TES5Variable $target, TES5Value $value) {
-        return new TES5VariableAssignation($this->referenceFactory->createReferenceToVariable($target), $value);
-    }
-
     public function createAssignation(TES5Referencer $target, TES5Value $value) {
         return new TES5VariableAssignation($target, $value);
     }

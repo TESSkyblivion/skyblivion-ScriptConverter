@@ -4,7 +4,7 @@ namespace Ormin\OBSLexicalParser\TES5\Factory;
 
 use Ormin\OBSLexicalParser\TES5\AST\Block\TES5EventBlockList;
 use Ormin\OBSLexicalParser\TES5\AST\Block\TES5EventCodeBlock;
-use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5FunctionScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES4\AST\Block\TES4CodeBlock;
@@ -20,9 +20,9 @@ class TES5BlockFactory
     private $codeChunkFactory;
 
     /**
-     * @var TES5BlockLocalScopeFactory
+     * @var TES5BlockFunctionScopeFactory
      */
-    private $blockLocalScopeFactory;
+    private $blockFunctionScopeFactory;
 
     /**
      * @var TES5CodeScopeFactory
@@ -34,16 +34,23 @@ class TES5BlockFactory
      */
     private $changesPass;
 
+    /**
+     * @var TES5LocalScopeFactory
+     */
+    private $localScopeFactory;
+
     public function __construct(TES5ChainedCodeChunkFactory $chainedCodeChunkFactory,
-                                TES5BlockLocalScopeFactory $blockLocalScopeFactory,
+                                TES5BlockFunctionScopeFactory $blockFunctionScopeFactory,
                                 TES5CodeScopeFactory $codeScopeFactory,
-                                TES5AdditionalBlockChangesPass $changesPass)
+                                TES5AdditionalBlockChangesPass $changesPass,
+                                TES5LocalScopeFactory $localScopeFactory)
     {
 
         $this->codeChunkFactory = $chainedCodeChunkFactory;
-        $this->blockLocalScopeFactory = $blockLocalScopeFactory;
+        $this->blockFunctionScopeFactory = $blockFunctionScopeFactory;
         $this->codeScopeFactory = $codeScopeFactory;
         $this->changesPass = $changesPass;
+        $this->localScopeFactory = $localScopeFactory;
     }
 
     private function mapBlockType($blockType)
@@ -196,18 +203,12 @@ class TES5BlockFactory
         return $newBlockType;
     }
 
-    public function createNewBlock($blockType, TES5LocalScope $localScope = null)
+    public function createNewBlock($blockType, TES5FunctionScope $functionScope = null)
     {
-
-        if ($localScope === null) {
-            $localScope = new TES5LocalScope();
-        } else {
-            if ($localScope->getParentScope() !== null) {
-                throw new ConversionException("TES5BlockFactory::createNewBlock - Local scope created must be the root, cannot be nested.");
-            }
+        if ($functionScope === null) {
+            $functionScope = new TES5FunctionScope($blockType);
         }
-
-        $newBlock = new TES5EventCodeBlock($blockType, $localScope, $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($localScope)));
+        $newBlock = new TES5EventCodeBlock($functionScope, $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($functionScope)));
         return $newBlock;
     }
 
@@ -228,9 +229,9 @@ class TES5BlockFactory
         }
 
         $newBlockType = $this->mapBlockType($blockType);
-        $blockLocalScope = $this->blockLocalScopeFactory->createFromBlockType($newBlockType, $globalScope);
+        $blockFunctionScope = $this->blockFunctionScopeFactory->createFromBlockType($newBlockType);
 
-        $newBlock = new TES5EventCodeBlock($newBlockType, $blockLocalScope, $this->codeScopeFactory->createCodeScope($this->blockLocalScopeFactory->createRecursiveScope($blockLocalScope)));
+        $newBlock = new TES5EventCodeBlock($blockFunctionScope, $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope)));
 
         if ($block->getChunks() !== null) {
 

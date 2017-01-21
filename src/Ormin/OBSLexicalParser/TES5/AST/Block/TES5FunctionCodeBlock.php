@@ -8,15 +8,10 @@ namespace Ormin\OBSLexicalParser\TES5\AST\Block;
 
 use Ormin\OBSLexicalParser\TES5\AST\Code\TES5CodeChunk;
 use Ormin\OBSLexicalParser\TES5\AST\Code\TES5CodeScope;
-use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope;
+use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5FunctionScope;
 use Ormin\OBSLexicalParser\TES5\Types\TES5Type;
 
 class TES5FunctionCodeBlock implements TES5CodeBlock {
-
-    /**
-     * @var string
-     */
-    private $functionName;
 
     /**
      * @var TES5CodeScope
@@ -24,18 +19,17 @@ class TES5FunctionCodeBlock implements TES5CodeBlock {
     private $codeScope;
 
     /**
-     * @var TES5LocalScope
+     * @var TES5FunctionScope
      */
-    private $localScope;
+    private $functionScope;
 
     /**
      * @var TES5Type
      */
     private $returnType;
 
-    public function __construct($functionName, TES5Type $returnType = null, TES5LocalScope $localScope, TES5CodeScope $chunks) {
-        $this->functionName = $functionName;
-        $this->localScope = $localScope;
+    public function __construct(TES5Type $returnType = null, TES5FunctionScope $functionScope, TES5CodeScope $chunks) {
+        $this->functionScope = $functionScope;
         $this->codeScope = $chunks;
         $this->returnType = $returnType;
     }
@@ -44,16 +38,16 @@ class TES5FunctionCodeBlock implements TES5CodeBlock {
 
         $codeLines = [];
 
-        $localScope = [];
-        foreach($this->localScope->getLocalVariables() as $localVariable) {
-            $localScope[] = $localVariable->getPropertyType()->output().' '.$localVariable->getPropertyName();
+        $functionSignatureFlat = [];
+        foreach($this->functionScope->getVariables() as $localVariable) {
+            $functionSignatureFlat[] = $localVariable->getPropertyType()->output().' '.$localVariable->getPropertyName();
         }
 
-        $localScope = '('.implode(', ',$localScope).')';
+        $functionSignature = implode(', ',$functionSignatureFlat);
 
         $functionReturnType = ($this->returnType !== null) ? $this->returnType->value().' ' : "";
 
-        $codeLines[] = $functionReturnType."Function ".$this->functionName.$localScope;
+        $codeLines[] = $functionReturnType."Function ".$this->functionScope->getBlockName().'('.$functionSignature.')';
 
         $codeLines = array_merge($codeLines,$this->codeScope->output());
 
@@ -66,7 +60,7 @@ class TES5FunctionCodeBlock implements TES5CodeBlock {
      */
     public function getFunctionName()
     {
-        return $this->functionName;
+        return $this->functionScope->getBlockName();
     }
 
     /**
@@ -85,21 +79,12 @@ class TES5FunctionCodeBlock implements TES5CodeBlock {
         $this->codeScope = $codeScope;
     }
 
-
-
     public function addChunk(TES5CodeChunk $chunk) {
         $this->codeScope->add($chunk);
     }
 
-    /**
-     * @return \Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope
-     */
-    public function getLocalScope()
-    {
-        return $this->localScope;
+    public function getFunctionScope() {
+        return $this->functionScope;
     }
-
-
-
 
 }

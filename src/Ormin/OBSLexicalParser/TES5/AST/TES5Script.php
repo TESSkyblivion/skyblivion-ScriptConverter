@@ -28,9 +28,9 @@ class TES5Script implements TES5Outputtable {
      */
     private $blockList;
 
-    public function __construct(TES5ScriptHeader $scriptHeader, TES5GlobalScope $propertyList = null, TES5BlockList $blockList = null) {
-        $this->scriptHeader = $scriptHeader;
-        $this->propertyList = $propertyList;
+    public function __construct(TES5GlobalScope $globalScope, TES5BlockList $blockList = null) {
+        $this->scriptHeader = $globalScope->getScriptHeader();
+        $this->propertyList = $globalScope;
         $this->blockList = $blockList;
     }
 

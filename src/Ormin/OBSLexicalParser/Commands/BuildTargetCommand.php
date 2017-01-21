@@ -3,8 +3,9 @@
 namespace Ormin\OBSLexicalParser\Commands;
 
 use Dariuszp\CliProgressBar;
+use Ormin\OBSLexicalParser\Builds\Build;
+use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
-use Ormin\OBSLexicalParser\Builds\TES5BuildPlanBuilder;
 use Ormin\OBSLexicalParser\Commands\Dispatch\ArchiveBuildJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\CompileScriptJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\PrepareWorkspaceJob;
@@ -12,7 +13,6 @@ use Ormin\OBSLexicalParser\Commands\Dispatch\TranspileChunkJob;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Amp\Promise;
 
@@ -26,8 +26,9 @@ class BuildTargetCommand extends Command
         $this
             ->setName('skyblivion:parser:build')
             ->setDescription('Create artifact[s] from OBScript source')
-            ->addArgument('target', InputArgument::REQUIRED, "The build target")
-            ->addArgument('threadsNumber', InputArgument::OPTIONAL, "Threads number", 4);
+            ->addArgument('targets', InputArgument::OPTIONAL, "The build targets", BuildTarget::DEFAULT_TARGETS)
+            ->addArgument('threadsNumber', InputArgument::OPTIONAL, "Threads number", 4)
+            ->addArgument('buildPath', InputArgument::OPTIONAL, "Build folder", Build::DEFAULT_BUILD_PATH);
 
     }
 
@@ -37,40 +38,39 @@ class BuildTargetCommand extends Command
 
         try {
 
-            $target = $input->getArgument('target');
+            $targets = $input->getArgument('targets');
             $this->threadsNumber = $input->getArgument('threadsNumber');
 
-            $buildTarget = BuildTargetFactory::get($target);
+            $buildPath = $input->getArgument('buildPath');
+            $build = new Build($buildPath);
+            $buildTargets = BuildTargetFactory::getCollection($targets, $build);
 
-            if (
-                (count(array_slice(scandir($buildTarget->getWorkspacePath()), 2)) > 0) ||
-                (count(array_slice(scandir($buildTarget->getTranspiledPath()), 2))) > 0 ||
-                (count(array_slice(scandir($buildTarget->getArtifactsPath()), 2))) > 0
-            ) {
-                $output->writeln("Target " . $target . " current build dir not clean, archive it manually.");
+            if (!$buildTargets->canBuild()) {
+                $output->writeln("Targets current build dir not clean, archive them manually or run ./clean.sh.");
                 return;
             }
 
             $output->writeln("Starting transpiling reactor using " . $this->threadsNumber . " threads...");
 
             $reactor = \Amp\reactor();
-            $reactor->run(function () use ($buildTarget, $output, $reactor) {
+            $reactor->run(function () use ($build, $buildPath, $buildTargets, $output, $reactor) {
 
-                $errorLog = fopen($buildTarget->getErrorLogPath(), "w+");
+                $errorLog = fopen($build->getErrorLogPath(), "w+");
 
-                $sourceFiles = array_slice(scandir($buildTarget->getSourcePath()), 2);
-
-                $buildPlanBuilder = new TES5BuildPlanBuilder(unserialize(file_get_contents('app/graph')));
-                $buildPlan = $buildPlanBuilder->createBuildPlan($sourceFiles, $this->threadsNumber);
-                $totalSourceFiles = count($sourceFiles);
-
+                $buildPlan = $buildTargets->getBuildPlan($this->threadsNumber);
+                $totalSourceFiles = $buildTargets->getTotalSourceFiles();
 
                 $progressBar = new CliProgressBar($totalSourceFiles);
                 $progressBar->display();
 
                 $promises = [];
                 foreach ($buildPlan as $threadBuildPlan) {
-                    $task = new TranspileChunkJob($buildTarget->getTargetName(), $threadBuildPlan);
+
+                    /**
+                     * We had some problems with sharing objects inside the jobs, so thats why we pass the path.
+                     * Maybe later we can just inject Build and it will be nice and clean :)
+                     */
+                    $task = new TranspileChunkJob($buildPath, $threadBuildPlan);
 
                     $deferred = new \Amp\Deferred;
 
@@ -91,10 +91,11 @@ class BuildTargetCommand extends Command
 
 
                     $promise->watch(function ($data) use ($progressBar, $errorLog) {
-                        $progressBar->progress(count($data['scripts']));
+
+                        $progressBar->progress(1);
 
                         if (isset($data['exception'])) {
-                            fwrite($errorLog, implode(', ',$data['scripts']).PHP_EOL.$data['exception']);
+                            fwrite($errorLog, $data['script'].PHP_EOL.$data['exception']);
                         }
 
                     });
@@ -124,12 +125,12 @@ class BuildTargetCommand extends Command
              * @TODO - Create a factory that will provide a PrepareWorkspaceJob based on running system, so we can provide a
              * native implementation for Windows
              */
-            $prepareCommand = new PrepareWorkspaceJob($buildTarget->getTargetName());
+            $prepareCommand = new PrepareWorkspaceJob($buildTargets);
             $prepareCommand->run();
 
             $output->writeln("Workspace prepared...");
 
-            $task = new CompileScriptJob($buildTarget->getTargetName());
+            $task = new CompileScriptJob($buildTargets, $build->getCompileLogPath());
             $task->run();
 
             $output->writeln("Build completed, archiving ...");
@@ -140,13 +141,13 @@ class BuildTargetCommand extends Command
              * @TODO - Create a factory that will provide a PrepareWorkspaceJob based on running system, so we can provide a
              * native implementation for Windows
              */
-            $prepareCommand = new ArchiveBuildJob($buildTarget->getTargetName());
-            $prepareCommand->run();
+            //$prepareCommand = new ArchiveBuildJob($buildTarget->getTargetName());
+            //$prepareCommand->run();
 
 
 
         } catch (\LogicException $e) {
-            $output->writeln("Unknown target " . $target . ", exiting.");
+            $output->writeln($e->getMessage());
             return;
         } catch (\Exception $e) {
             var_dump($e->getMessage());

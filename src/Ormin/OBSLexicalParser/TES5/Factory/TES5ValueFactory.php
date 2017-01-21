@@ -284,7 +284,7 @@ class TES5ValueFactory
                         case 15:
                         case 17: {
                             //@INCONSISTENCE Wander.. idk how to check it tbh. We return always true. Think about better representation
-                            return new TES5Bool((bool)$expression->getOperator() == TES4ArithmeticExpressionOperator::OPERATOR_EQUAL());
+                            return new TES5Bool((bool)($expression->getOperator() == TES4ArithmeticExpressionOperator::OPERATOR_EQUAL()));
                         }
 
                         default: {
@@ -500,11 +500,10 @@ class TES5ValueFactory
     public function createCodeChunk(TES4Callable $chunk, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
 
-        $localScope = $codeScope->getLocalScope();
         $function = $chunk->getFunction();
 
         $calledOnReference = $this->createCalledOnReferenceOfCalledFunction($chunk, $codeScope, $globalScope, $multipleScriptsScope);
-        $codeChunk = $this->convertFunction($calledOnReference, $function, $codeScope, $globalScope, $multipleScriptsScope, $localScope);
+        $codeChunk = $this->convertFunction($calledOnReference, $function, $codeScope, $globalScope, $multipleScriptsScope);
         $codeChunks = new TES5CodeChunkCollection();
         $codeChunks->add($codeChunk);
 
@@ -538,12 +537,12 @@ class TES5ValueFactory
      * @param TES5CodeScope $codeScope
      * @param TES5GlobalScope $globalScope
      * @param TES5MultipleScriptsScope $multipleScriptsScope
-     * @param TES5LocalScope $localScope
      * @return TES4Function|TES5Filler|\Ormin\OBSLexicalParser\TES5\AST\Expression\TES5ArithmeticExpression|\Ormin\OBSLexicalParser\TES5\AST\Expression\TES5LogicalExpression|\Ormin\OBSLexicalParser\TES5\AST\Expression\TES5TrueBooleanExpression|TES5ObjectCall|TES5ObjectProperty|TES5Reference|TES5SelfReference|TES5Bool
      * @throws \Ormin\OBSLexicalParser\TES5\Exception\ConversionException
      */
-    public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope, TES5LocalScope $localScope)
+    public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
+        $localScope = $codeScope->getLocalScope();
 
         $functionName = $function->getFunctionCall()->getFunctionName();
         $functionArguments = $function->getArguments();
@@ -940,14 +939,8 @@ class TES5ValueFactory
                 break;
             }
             case "getamountsoldstolen": {
-                //todo maybe recreate the behavior
-                //for now similar thing only
-                $argumentsList = new TES5ObjectCallArguments();
-                $argumentsList->add(new TES5String("Items Stolen"));
-                return $this->createObjectCall(
-                    new TES5StaticReference("Game"), "QueryStat", $multipleScriptsScope, $argumentsList
-                );
-
+                $calledOn = new TES5StaticReference("Game");
+                return $this->createObjectCall($calledOn, "GetAmountSoldStolen",$multipleScriptsScope);
                 break;
             }
             case "getangle": {
@@ -993,8 +986,6 @@ class TES5ValueFactory
                 return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
                 break;
             }
-            //Not done since this point ,rest is like.. manual .
-
             case "getbuttonpressed": {
                 return $this->createReadReference(TES5ReferenceFactory::MESSAGEBOX_VARIABLE_CONST, $globalScope, $multipleScriptsScope, $localScope);
                 break;
@@ -1076,8 +1067,9 @@ class TES5ValueFactory
                 break;
             }
             case "getdestroyed": {
-                $functionName = "isActivationBlocked";
-                #               throw new ConversionException("GetDestroyed() is not accessible via Papyrus.");
+                /**
+                 * Handled by SKSE plugin
+                 */
                 return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
                 break;
             }
@@ -1750,9 +1742,10 @@ class TES5ValueFactory
             }
             case "ispcamurderer": {
 
-                //Using Legacy TES4 Connector Plugin
-                return $this->objectPropertyFactory->createObjectProperty($multipleScriptsScope, $this->createReadReference("tContainer", $globalScope, $multipleScriptsScope, $localScope), "isMurderer");
-                break;
+                /**
+                 * Added via SKSE plugin
+                 */
+                return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
             }
             case "ispcsleeping": {
 

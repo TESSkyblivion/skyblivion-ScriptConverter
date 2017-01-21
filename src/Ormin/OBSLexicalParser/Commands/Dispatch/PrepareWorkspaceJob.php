@@ -9,33 +9,38 @@
 namespace Ormin\OBSLexicalParser\Commands\Dispatch;
 
 
+use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
+use Ormin\OBSLexicalParser\Builds\BuildTargetCollection;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 
 class PrepareWorkspaceJob
 {
 
     /**
-     * @var string
+     * @var BuildTargetCollection
      */
-    private $buildTarget;
+    private $buildTargetCollection;
 
-
-    public function __construct($buildTarget)
+    public function __construct(BuildTargetCollection $buildTargetCollection)
     {
-        $this->buildTarget = $buildTarget;
+        $this->buildTargetCollection = $buildTargetCollection;
     }
 
 
     public function run()
     {
 
-        $buildTarget = BuildTargetFactory::get($this->buildTarget);
+        /**
+         * @var BuildTarget $buildTarget
+         */
+        foreach($this->buildTargetCollection->getIterator() as $buildTarget) {
+            $systemCommand = "cp -a ".$buildTarget->getTranspiledPath().". ".$buildTarget->getWorkspacePath();
+            shell_exec(escapeshellcmd($systemCommand));
+            $systemCommand = "cp -a ".$buildTarget->getDependenciesPath().". ".$buildTarget->getWorkspacePath();
+            shell_exec(escapeshellcmd($systemCommand));
+        }
 
-        $systemCommand = "cp -a ".$buildTarget->getTranspiledPath().". ".$buildTarget->getWorkspacePath();
-        shell_exec(escapeshellcmd($systemCommand));
-        $systemCommand = "cp -a ".$buildTarget->getDependenciesPath().". ".$buildTarget->getWorkspacePath();
-        shell_exec(escapeshellcmd($systemCommand));
     }
 
 }

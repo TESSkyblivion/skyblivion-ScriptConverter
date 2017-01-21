@@ -42,7 +42,11 @@ class TES5TypeFactory {
             }
 
 
-            return new TES5CustomType(TES5NameTransformer::transform($memberByValue,self::$scriptsPrefix), self::$scriptsPrefix, $basicType);
+            return new TES5CustomType(
+                TES5NameTransformer::transform($memberByValue,self::$scriptsPrefix),
+                self::$scriptsPrefix,
+                $memberByValue,
+                $basicType);
         }
 
 

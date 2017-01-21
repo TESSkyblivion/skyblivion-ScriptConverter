@@ -4804,6 +4804,11 @@ class TES5InheritanceGraphAnalyzer
                             ),
                         'returnType' => 'void',
                     ),
+                'GetAmountSoldStolen' =>
+                    array (
+                        'args' => array (),
+                        'returnType' => 'int'
+                    ),
                 'GetForm' =>
                     array (
                         'args' =>
@@ -4982,6 +4987,11 @@ class TES5InheritanceGraphAnalyzer
                             array (
                             ),
                         'returnType' => 'bool',
+                    ),
+                'IsPCAMurderer' =>
+                    array (
+                        'args' => array (),
+                        'returnType' => 'int'
                     ),
                 'IsPlayerSungazing' =>
                     array (
@@ -6304,6 +6314,12 @@ class TES5InheritanceGraphAnalyzer
                             array (
                             ),
                         'returnType' => 'Scene',
+                    ),
+                'GetDestroyed' =>
+                    array (
+                        'args' =>
+                            array (),
+                        'returnType' => 'int'
                     ),
                 'GetDistance' =>
                     array (

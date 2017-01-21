@@ -6,8 +6,6 @@
 
 namespace Ormin\OBSLexicalParser\Builds\Standalone;
 
-
-use Ormin\OBSLexicalParser\Builds\CompilationUnsuccessfullException;
 use Ormin\OBSLexicalParser\Utilities\ExternalExecution;
 
 class CompileCommand implements \Ormin\OBSLexicalParser\Builds\CompileCommand {
@@ -22,12 +20,12 @@ class CompileCommand implements \Ormin\OBSLexicalParser\Builds\CompileCommand {
         $stdout = "";
         $stderr = "";
 
-	$compilerPath = getcwd() . "/Compiler/";
+        $compilerPath = getcwd() . "/Compiler/";
 
-	$command = 'mono "'.$compilerPath.'PapyrusCompiler.exe" "'.$sourcePath.'" -f="'.$compilerPath.'/TESV_Papyrus_Flags.flg" -i="'.$workspacePath.'" -o="'.$outputPath.'" -a';
-	echo 'Executing command: '.$command.PHP_EOL;
-	
-	ExternalExecution::run($command,$stdout,$stderr);
+        $command = 'mono "'.$compilerPath.'PapyrusCompiler.exe" "'.$sourcePath.'" -f="'.$compilerPath.'/TESV_Papyrus_Flags.flg" -i="'.$workspacePath.'" -o="'.$outputPath.'" -a';
+        echo 'Executing command: '.$command.PHP_EOL;
+
+        ExternalExecution::run($command,$stdout,$stderr);
 
         return implode(PHP_EOL,$stderr);
 

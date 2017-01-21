@@ -42,7 +42,7 @@ class ESMAnalyzer
     /**
      * @var string
      */
-    private $esm;
+    private static $esm;
 
     /**
      * @var TES5Type[]
@@ -72,13 +72,13 @@ class ESMAnalyzer
     {
         $this->typeMapper = $typeMapper;
 
-        if ($this->esm === null) {
-            $this->esm = file_get_contents($dataFile);
+        if (self::$esm === null) {
+            self::$esm = file_get_contents($dataFile);
         }
 
         if ($this->scriptTypes === null) {
 
-            preg_match_all("#SCPT................EDID..([a-zA-Z0-9_-]+)\x{00}SCHR..................(..)#si", $this->esm, $scripts);
+            preg_match_all("#SCPT................EDID..([a-zA-Z0-9_-]+)\x{00}SCHR..................(..)#si", self::$esm, $scripts);
             foreach ($scripts[2] as $i => $type) {
                 $is_q = (bool)ord($type[0]);
                 $is_m = (bool)ord($type[1]);
@@ -99,7 +99,7 @@ class ESMAnalyzer
 
         if ($this->globals === null) {
 
-            preg_match_all("#GLOB................EDID..([a-zA-Z0-9_-]+)\x{00}#si", $this->esm, $globals);
+            preg_match_all("#GLOB................EDID..([a-zA-Z0-9_-]+)\x{00}#si", self::$esm, $globals);
             $globalArray = [];
             foreach ($globals[1] as $global) {
                 $globalArray[] = new TES5GlobalVariable($global);
@@ -152,11 +152,11 @@ class ESMAnalyzer
         if (strlen($hex) == 1)
             $hex = '0' . $hex;
 
-        preg_match("#EDID\x{" . $hex . "}." . $EDID . "\x{00}#i", $this->esm, $matches, PREG_OFFSET_CAPTURE);
+        preg_match("#EDID\x{" . $hex . "}." . $EDID . "\x{00}#i", self::$esm, $matches, PREG_OFFSET_CAPTURE);
 
         if (isset($matches[0])) {
             $offset = $matches[0][1] - 20;
-            $type = substr($this->esm, $offset, 4);
+            $type = substr(self::$esm, $offset, 4);
 
             return TypeMapper::map($type);
         } else {
@@ -180,7 +180,7 @@ class ESMAnalyzer
 
         if(!$this->npcLoaded) {
 
-            preg_match("#GRUP(....)NPC_#si",$this->esm,$matches,PREG_OFFSET_CAPTURE);
+            preg_match("#GRUP(....)NPC_#si",self::$esm,$matches,PREG_OFFSET_CAPTURE);
 
             $size = 0;
 
@@ -188,7 +188,7 @@ class ESMAnalyzer
                 $size += ord($matches[1][0][$i]) * pow(256,$i);
             }
 
-            $npcData = substr($this->esm, $matches[0][1], $size);
+            $npcData = substr(self::$esm, $matches[0][1], $size);
             $pointer = 20; //First GRUP record is at 20th byte.
 
             while($pointer < $size) {
@@ -263,9 +263,9 @@ class ESMAnalyzer
 
 
             if ( //three preg matches are for performance reasons - much better than grouping
-                preg_match("#REFR................EDID..(?i)" . $attachedName . "(?-i)\x{00}NAME..(....)#s", $this->esm, $refrFormidMatches) ||
-                preg_match("#ACRE................EDID..(?i)" . $attachedName . "(?-i)\x{00}NAME..(....)#s", $this->esm, $acreFormidMatches) ||
-                preg_match("#ACHR................EDID..(?i)" . $attachedName . "(?-i)\x{00}NAME..(....)#s", $this->esm, $achrFormidMatches)
+                preg_match("#REFR................EDID..(?i)" . $attachedName . "(?-i)\x{00}NAME..(....)#s", self::$esm, $refrFormidMatches) ||
+                preg_match("#ACRE................EDID..(?i)" . $attachedName . "(?-i)\x{00}NAME..(....)#s", self::$esm, $acreFormidMatches) ||
+                preg_match("#ACHR................EDID..(?i)" . $attachedName . "(?-i)\x{00}NAME..(....)#s", self::$esm, $achrFormidMatches)
             ) {
 
                 if(!empty($refrFormidMatches)) {
@@ -295,9 +295,9 @@ class ESMAnalyzer
                 }
 
                 if($searchedFormType != "NPC_") {
-                    preg_match("#".$searchedFormType."........" . $targetFormidString . ".*?SCRI..(....)#s", $this->esm, $matches);
+                    preg_match("#".$searchedFormType."........" . $targetFormidString . ".*?SCRI..(....)#s", self::$esm, $matches);
                 } else {
-                    if (preg_match("#NPC_(....)...." . $targetFormidString . "#s", $this->esm, $failoverMatches, PREG_OFFSET_CAPTURE)) {
+                    if (preg_match("#NPC_(....)...." . $targetFormidString . "#s", self::$esm, $failoverMatches, PREG_OFFSET_CAPTURE)) {
                         $baseDataOffset = $failoverMatches[0][1] + 24;
                         $dataLengthMatch = $failoverMatches[1][0];
                         $dataLength = 0;
@@ -307,7 +307,7 @@ class ESMAnalyzer
 
                         $dataLength -= 4;
 
-                        $gzippedData = substr($this->esm, $baseDataOffset, $dataLength);
+                        $gzippedData = substr(self::$esm, $baseDataOffset, $dataLength);
                         $ungzippedData = gzuncompress($gzippedData);
                         preg_match("#SCRI..(....)#si", $ungzippedData, $matches);
                     }
@@ -315,7 +315,7 @@ class ESMAnalyzer
 
             } else {
                 //Just go with usual matching via EDID
-                preg_match("#EDID..(?i)" . $attachedName . "(?-i)\x{00}.*?SCRI..(....)#s", $this->esm, $matches);
+                preg_match("#EDID..(?i)" . $attachedName . "(?-i)\x{00}.*?SCRI..(....)#s", self::$esm, $matches);
 
             }
 
@@ -336,7 +336,7 @@ class ESMAnalyzer
             }
 
 
-            preg_match("#SCPT........" . $hexString . "....EDID..([a-zA-Z0-9]+)#si", $this->esm, $dataMatches);
+            preg_match("#SCPT........" . $hexString . "....EDID..([a-zA-Z0-9]+)#si", self::$esm, $dataMatches);
 
             if (empty($dataMatches)) {
                 throw new ConversionException("For EDID " . $attachedName . " and script formid " . $hexFormid . " we couldn't find any scripts in ESM.");
