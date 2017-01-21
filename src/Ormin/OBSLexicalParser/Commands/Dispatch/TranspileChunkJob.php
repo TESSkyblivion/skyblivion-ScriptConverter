@@ -114,7 +114,6 @@ class TranspileChunkJob
             foreach($convertedScripts as $originalScriptName => $convertedScript)
             {
                 file_put_contents($convertedScript->getOutputPath(), $convertedScript->getScript()->output());
-                passthru('lua "Utilities/beautifier.lua" "' . $convertedScript->getOutputPath() . '"');
                 $this->updateWorker($deferred, true,  $originalScriptName);
             }
 
