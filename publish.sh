@@ -1,2 +1,2 @@
 rm -rf ./deploy.zip
-zip -r deploy.zip ./Build/Artifacts/
+zip -r deploy.zip ./Build/Artifacts/ ./Build/Transpiled/
