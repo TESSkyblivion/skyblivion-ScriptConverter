@@ -6,6 +6,8 @@ use Dariuszp\CliProgressBar;
 use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
+use Ormin\OBSLexicalParser\Builds\BuildTracker;
+use Ormin\OBSLexicalParser\Builds\TranspiledScriptsWriter;
 use Ormin\OBSLexicalParser\Commands\Dispatch\ArchiveBuildJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\CompileScriptJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\PrepareWorkspaceJob;
@@ -44,6 +46,7 @@ class BuildTargetCommand extends Command
             $buildPath = $input->getArgument('buildPath');
             $build = new Build($buildPath);
             $buildTargets = BuildTargetFactory::getCollection($targets, $build);
+            $buildTracker = new BuildTracker($buildTargets);
 
             if (!$buildTargets->canBuild()) {
                 $output->writeln("Targets current build dir not clean, archive them manually or run ./clean.sh.");
@@ -53,7 +56,7 @@ class BuildTargetCommand extends Command
             $output->writeln("Starting transpiling reactor using " . $this->threadsNumber . " threads...");
 
             $reactor = \Amp\reactor();
-            $reactor->run(function () use ($build, $buildPath, $buildTargets, $output, $reactor) {
+            $reactor->run(function () use ($build, $buildPath, $buildTracker, $buildTargets, $output, $reactor) {
 
                 $errorLog = fopen($build->getErrorLogPath(), "w+");
 
@@ -70,7 +73,7 @@ class BuildTargetCommand extends Command
                      * We had some problems with sharing objects inside the jobs, so thats why we pass the path.
                      * Maybe later we can just inject Build and it will be nice and clean :)
                      */
-                    $task = new TranspileChunkJob($buildPath, $threadBuildPlan);
+                    $task = new TranspileChunkJob($buildTracker, $buildPath, $threadBuildPlan);
 
                     $deferred = new \Amp\Deferred;
 
@@ -117,7 +120,9 @@ class BuildTargetCommand extends Command
 
             });
 
-
+            $output->writeln("Writing transpiled scripts..");
+            $transpiledScriptsWriter = new TranspiledScriptsWriter();
+            $transpiledScriptsWriter->writeTranspiledScripts($buildTargets, $buildTracker);
             $output->writeln("Preparing build workspace...");
 
             /*

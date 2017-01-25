@@ -104,6 +104,9 @@ class BuildTargetCollection implements \IteratorAggregate
         return $buildPlan;
     }
 
+    /**
+     * @return BuildTarget[]
+     */
     public function getIterator()
     {
         return new \ArrayIterator($this->buildTargets);

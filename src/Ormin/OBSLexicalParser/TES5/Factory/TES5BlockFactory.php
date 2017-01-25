@@ -231,7 +231,7 @@ class TES5BlockFactory
         $newBlockType = $this->mapBlockType($blockType);
         $blockFunctionScope = $this->blockFunctionScopeFactory->createFromBlockType($newBlockType);
 
-        $newBlock = new TES5EventCodeBlock($blockFunctionScope, $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope)));
+        $newBlock = $this->createNewBlock($newBlockType, $blockFunctionScope);
 
         if ($block->getChunks() !== null) {
 

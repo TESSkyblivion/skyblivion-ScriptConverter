@@ -86,12 +86,16 @@ class BuildTargetFactory
             }
 
             case 'QF': {
+                $fragmentsParsingService = new FragmentsParsingService(
+                    new SyntaxErrorCleanParser(new \Ormin\OBSLexicalParser\TES4\Parser\TES4ObscriptCodeGrammar())
+                );
+
                 return new BuildTarget(
                     'QF',
                     '',
                     $build,
                     new TES5NameTransformer(),
-                    new \Ormin\OBSLexicalParser\Builds\QF\TranspileCommand(),
+                    new \Ormin\OBSLexicalParser\Builds\QF\TranspileCommand($fragmentsParsingService),
                     new \Ormin\OBSLexicalParser\Builds\QF\CompileCommand(),
                     new \Ormin\OBSLexicalParser\Builds\QF\ASTCommand(),
                     new \Ormin\OBSLexicalParser\Builds\PF\BuildScopeCommand()

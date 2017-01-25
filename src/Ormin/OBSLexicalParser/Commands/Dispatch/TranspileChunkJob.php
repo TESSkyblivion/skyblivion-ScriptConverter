@@ -12,6 +12,7 @@ use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetCollection;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
+use Ormin\OBSLexicalParser\Builds\BuildTracker;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
@@ -19,6 +20,8 @@ use Ormin\OBSLexicalParser\TES5\Factory\TES5StaticGlobalScopesFactory;
 
 class TranspileChunkJob
 {
+
+    private $buildTracker;
 
     /**
      * @var BuildTargetCollection
@@ -44,12 +47,14 @@ class TranspileChunkJob
      * No injection is done here because of multithreaded enviroment which fucks it up.
      * Maybe at some point we will have a proper DI into the jobs.
      * TranspileChunkJob constructor.
+     * @param BuildTracker $buildTracker
      * @param $buildPath
      * @param $buildPlan
      */
-    public function __construct($buildPath, $buildPlan)
+    public function __construct(BuildTracker $buildTracker, $buildPath, $buildPlan)
     {
         $this->buildPlan = $buildPlan;
+        $this->buildTracker = $buildTracker;
         $this->build = new Build($buildPath);
         $this->staticGlobalScopesFactory = new TES5StaticGlobalScopesFactory();
         $this->buildTargets = new BuildTargetCollection();
@@ -102,6 +107,7 @@ class TranspileChunkJob
                     try {
                         $convertedScript = $buildTarget->transpile($sourcePath, $outputPath, $globalScope, $multipleScriptsScope);
                         $convertedScripts[$buildScript] = $convertedScript;
+                        $this->buildTracker->registerBuiltScript($buildTarget, $convertedScript);
                     } catch (\Exception $e) {
                         $this->updateWorker($deferred, false, $buildScript,get_class($e) . PHP_EOL . $e->getMessage() . PHP_EOL);
                     }
@@ -113,7 +119,6 @@ class TranspileChunkJob
              */
             foreach($convertedScripts as $originalScriptName => $convertedScript)
             {
-                file_put_contents($convertedScript->getOutputPath(), $convertedScript->getScript()->output());
                 $this->updateWorker($deferred, true,  $originalScriptName);
             }
 
