@@ -17,7 +17,7 @@ use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
 class BuildTarget
 {
 
-    const DEFAULT_TARGETS = "Standalone,TIF";
+    const DEFAULT_TARGETS = "Standalone,TIF,QF";
 
     /**
      * @var string
