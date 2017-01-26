@@ -98,7 +98,7 @@ class BuildTargetFactory
                     new \Ormin\OBSLexicalParser\Builds\QF\TranspileCommand($fragmentsParsingService),
                     new \Ormin\OBSLexicalParser\Builds\QF\CompileCommand(),
                     new \Ormin\OBSLexicalParser\Builds\QF\ASTCommand(),
-                    new \Ormin\OBSLexicalParser\Builds\PF\BuildScopeCommand()
+                    new \Ormin\OBSLexicalParser\Builds\QF\BuildScopeCommand()
                 );
             }
 
