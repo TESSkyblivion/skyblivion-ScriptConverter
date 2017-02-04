@@ -15,7 +15,7 @@ use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
 use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
-use Ormin\OBSLexicalParser\Builds\QF\Map\QuestStageScript;
+use Ormin\OBSLexicalParser\Builds\QF\Factory\Map\QuestStageScript;
 use Ormin\OBSLexicalParser\TES5\AST\Property\TES5Property;
 use Ormin\OBSLexicalParser\TES5\AST\TES5ScriptHeader;
 

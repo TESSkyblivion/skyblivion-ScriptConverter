@@ -5,7 +5,7 @@
  * Time: 8:17 PM
  */
 
-namespace Ormin\OBSLexicalParser\Builds\QF\Map;
+namespace Ormin\OBSLexicalParser\Builds\QF\Factory\Map;
 
 
 use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
