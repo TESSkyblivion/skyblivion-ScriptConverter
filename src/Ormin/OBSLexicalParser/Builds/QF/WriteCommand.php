@@ -9,7 +9,7 @@ namespace Ormin\OBSLexicalParser\Builds\QF;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTracker;
 use Ormin\OBSLexicalParser\Builds\QF\Factory\QFFragmentFactory;
-use Ormin\OBSLexicalParser\Builds\QF\Map\QuestStageScript;
+use Ormin\OBSLexicalParser\Builds\QF\Factory\Map\QuestStageScript;
 
 class WriteCommand implements \Ormin\OBSLexicalParser\Builds\WriteCommand
 {
