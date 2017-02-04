@@ -117,9 +117,9 @@ class QFFragmentFactory
         }
 
         /**
-         * Intersect to find stages which we still need to mark
+         * Diff to find stages which we still need to mark
          */
-        $nonDoneStages = array_intersect(array_keys($stageMap), array_keys($implementedStages));
+        $nonDoneStages = array_diff(array_keys($stageMap), array_keys($implementedStages));
 
         foreach($nonDoneStages as $nonDoneStage)
         {
