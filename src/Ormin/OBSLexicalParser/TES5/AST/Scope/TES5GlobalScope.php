@@ -67,6 +67,10 @@ class TES5GlobalScope implements TES5Outputtable {
         return null;
     }
 
+    public function getPropertiesList() {
+        return $this->properties;
+    }
+
     public function getGlobalVariableByName($globalVariableName) {
         foreach($this->globalVariables as $globalVariable) {
             if(strtolower($globalVariableName) == strtolower($globalVariable->getName())) {

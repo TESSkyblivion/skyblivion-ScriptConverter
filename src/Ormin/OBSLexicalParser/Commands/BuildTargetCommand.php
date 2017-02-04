@@ -6,10 +6,10 @@ use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 use Ormin\OBSLexicalParser\Builds\BuildTracker;
-use Ormin\OBSLexicalParser\Builds\TranspiledScriptsWriter;
 use Ormin\OBSLexicalParser\Commands\Dispatch\CompileScriptJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\PrepareWorkspaceJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\TranspileChunkJob;
+use Ormin\OBSLexicalParser\Commands\Progress\ProgressInformer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -45,6 +45,7 @@ class BuildTargetCommand extends Command
             $build = new Build($buildPath);
             $buildTargets = BuildTargetFactory::getCollection($targets, $build);
             $buildTracker = new BuildTracker($buildTargets);
+            $progressInformer = new ProgressInformer($output);
 
             if (!$buildTargets->canBuild()) {
                 $output->writeln("Targets current build dir not clean, archive them manually or run ./clean.sh.");
@@ -54,7 +55,7 @@ class BuildTargetCommand extends Command
             $output->writeln("Starting transpiling reactor using " . $this->threadsNumber . " threads...");
 
             $reactor = \Amp\reactor();
-            $reactor->run(function () use ($build, $buildPath, $buildTracker, $buildTargets, $output, $reactor) {
+            $reactor->run(function () use ($build, $buildPath, $buildTracker, $buildTargets, $output, $progressInformer, $reactor) {
 
                 $errorLog = fopen($build->getErrorLogPath(), "w+");
 
@@ -77,8 +78,8 @@ class BuildTargetCommand extends Command
 
                     $promise = $deferred->promise();
 
-                    $promise->when(function (\Exception $e = null, $return = null) use ($output, $errorLog) {
-
+                    $promise->when(function (\Exception $e = null, $return = null) use ($output, $progressInformer, $errorLog) {
+                        
                         if ($e) {
                             $output->writeln('Exception ' . get_class($e) . ' occurred in one of the threads while transpiling, progress bar will not be accurate..');
                             fwrite($errorLog, get_class($e) . PHP_EOL . $e->getMessage() . PHP_EOL);
@@ -87,8 +88,9 @@ class BuildTargetCommand extends Command
                     });
 
 
-                    $promise->watch(function ($data) use ($errorLog) {
+                    $promise->watch(function ($data) use ($progressInformer, $errorLog) {
 
+                        $progressInformer->progress();
                         if (isset($data['exception'])) {
                             fwrite($errorLog, $data['script'].PHP_EOL.$data['exception']);
                         }
@@ -112,8 +114,9 @@ class BuildTargetCommand extends Command
             });
 
             $output->writeln("Writing transpiled scripts..");
-            $transpiledScriptsWriter = new TranspiledScriptsWriter();
-            $transpiledScriptsWriter->writeTranspiledScripts($buildTargets, $buildTracker);
+            foreach($buildTargets->getIterator() as $buildTarget) {
+                $buildTarget->write($buildTracker);
+            }
             $output->writeln("Preparing build workspace...");
 
             /*

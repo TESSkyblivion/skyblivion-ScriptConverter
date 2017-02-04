@@ -13,6 +13,7 @@ use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\Context\TypeMapper;
+use Ormin\OBSLexicalParser\TES5\Converter\TES4ToTES5ASTQFFragmentConverter;
 use Ormin\OBSLexicalParser\TES5\Converter\TES4ToTES5ASTTIFFragmentConverter;
 use Ormin\OBSLexicalParser\TES5\Converter\TES5AdditionalBlockChangesPass;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5BlockFunctionScopeFactory;
@@ -88,7 +89,7 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
 
         $chainedCodeChunkFactory = new TES5ChainedCodeChunkFactory($valueFactory, $returnFactory, $assignationConversionFactory, $branchFactory, $localVariableFactory);
 
-        $converter = new TES4ToTES5ASTTIFFragmentConverter(
+        $converter = new TES4ToTES5ASTQFFragmentConverter(
             $analyzer,
             new TES5FragmentFactory($chainedCodeChunkFactory, new TES5FragmentFunctionScopeFactory(), $codeScopeFactory, new TES5AdditionalBlockChangesPass($valueFactory, $blockLocalScopeFactory, $codeScopeFactory, $expressionFactory, $referenceFactory, $branchFactory, $assignationFactory, $localScopeFactory), $localScopeFactory),
             $valueFactory,

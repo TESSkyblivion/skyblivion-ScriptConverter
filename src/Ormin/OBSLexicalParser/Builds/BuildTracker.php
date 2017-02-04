@@ -6,7 +6,6 @@
  */
 
 namespace Ormin\OBSLexicalParser\Builds;
-use Ormin\OBSLexicalParser\TES5\AST\TES5Script;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
 
 
@@ -47,16 +46,16 @@ class BuildTracker
     }
 
     /**
-     * @param BuildTarget $target
+     * @param String $targetName
      * @return TES5Target[]
      */
-    public function getBuiltScripts(BuildTarget $target)
+    public function getBuiltScripts($targetName)
     {
-        if(!isset($this->builtScripts[$target->getTargetName()])) {
+        if(!isset($this->builtScripts[$targetName])) {
             return [];
         }
 
-        return $this->builtScripts[$target->getTargetName()];
+        return $this->builtScripts[$targetName];
     }
 
 

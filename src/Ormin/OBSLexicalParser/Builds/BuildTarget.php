@@ -16,8 +16,19 @@ use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
  */
 class BuildTarget
 {
+    const BUILD_TARGET_STANDALONE = "Standalone";
 
-    const DEFAULT_TARGETS = "Standalone,TIF,QF";
+    const BUILD_TARGET_TIF = "TIF";
+
+    const BUILD_TARGET_QF = "QF";
+
+    const BUILD_TARGET_PF = "PF";
+
+    const DEFAULT_TARGETS = self::BUILD_TARGET_STANDALONE .
+                            "," .
+                            self::BUILD_TARGET_TIF .
+                            "," .
+                            self::BUILD_TARGET_QF;
 
     /**
      * @var string
@@ -55,6 +66,11 @@ class BuildTarget
     private $buildScopeCommand;
 
     /**
+     * @var WriteCommand
+     */
+    private $writeCommand;
+
+    /**
      * Needed for proper resolution of filename
      * @var TES5NameTransformer
      */
@@ -67,7 +83,8 @@ class BuildTarget
                                 TranspileCommand $transpileCommand,
                                 CompileCommand $compileCommand,
                                 ASTCommand $ASTCommand,
-                                BuildScopeCommand $buildScopeCommand)
+                                BuildScopeCommand $buildScopeCommand,
+                                WriteCommand $writeCommand)
     {
         $this->transpileInitialized = false;
         $this->compileInitialized = false;
@@ -81,6 +98,7 @@ class BuildTarget
         $this->nameTransformer = $nameTransformer;
         $this->ASTCommand = $ASTCommand;
         $this->buildScopeCommand = $buildScopeCommand;
+        $this->writeCommand = $writeCommand;
     }
 
 
@@ -132,6 +150,11 @@ class BuildTarget
         }
 
         return $this->buildScopeCommand->buildScope($sourcePath);
+    }
+
+    public function write(BuildTracker $buildTracker)
+    {
+        $this->writeCommand->write($this, $buildTracker);
     }
 
     /**

@@ -43,7 +43,7 @@ class TES5Script implements TES5Outputtable {
     }
 
     /**
-     * @return \Ormin\OBSLexicalParser\TES4\AST\Block\TES4BlockList
+     * @return TES5BlockList
      */
     public function getBlockList()
     {
@@ -51,7 +51,7 @@ class TES5Script implements TES5Outputtable {
     }
 
     /**
-     * @return \Ormin\OBSLexicalParser\TES4\AST\TES4ScriptHeader
+     * @return TES5ScriptHeader
      */
     public function getScriptHeader()
     {
@@ -59,9 +59,9 @@ class TES5Script implements TES5Outputtable {
     }
 
     /**
-     * @return \Ormin\OBSLexicalParser\TES4\AST\VariableDeclaration\TES4VariableDeclarationList
+     * @return TES5GlobalScope
      */
-    public function getPropertyList()
+    public function getGlobalScope()
     {
         return $this->propertyList;
     }
