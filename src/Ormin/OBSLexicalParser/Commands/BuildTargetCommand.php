@@ -2,13 +2,11 @@
 
 namespace Ormin\OBSLexicalParser\Commands;
 
-use Dariuszp\CliProgressBar;
 use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 use Ormin\OBSLexicalParser\Builds\BuildTracker;
 use Ormin\OBSLexicalParser\Builds\TranspiledScriptsWriter;
-use Ormin\OBSLexicalParser\Commands\Dispatch\ArchiveBuildJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\CompileScriptJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\PrepareWorkspaceJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\TranspileChunkJob;
@@ -61,10 +59,6 @@ class BuildTargetCommand extends Command
                 $errorLog = fopen($build->getErrorLogPath(), "w+");
 
                 $buildPlan = $buildTargets->getBuildPlan($this->threadsNumber);
-                $totalSourceFiles = $buildTargets->getTotalSourceFiles();
-
-                $progressBar = new CliProgressBar($totalSourceFiles);
-                $progressBar->display();
 
                 $promises = [];
                 foreach ($buildPlan as $threadBuildPlan) {
@@ -93,9 +87,7 @@ class BuildTargetCommand extends Command
                     });
 
 
-                    $promise->watch(function ($data) use ($progressBar, $errorLog) {
-
-                        $progressBar->progress(1);
+                    $promise->watch(function ($data) use ($errorLog) {
 
                         if (isset($data['exception'])) {
                             fwrite($errorLog, $data['script'].PHP_EOL.$data['exception']);
@@ -112,8 +104,7 @@ class BuildTargetCommand extends Command
                  */
                 $transpilingPromise = \Amp\any($promises);
 
-                $transpilingPromise->when(function () use ($reactor, $progressBar, $errorLog) {
-                    $progressBar->end();
+                $transpilingPromise->when(function () use ($reactor, $errorLog) {
                     fclose($errorLog);
                     $reactor->stop();
                 });
