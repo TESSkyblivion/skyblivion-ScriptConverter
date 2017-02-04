@@ -151,7 +151,11 @@ class QFFragmentFactory
         {
             $e = explode("-",$stageMapLine);
             $stageId = trim($e[0]);
-            $stageRows = trim(explode(" ", $e[1]));
+            $stageRows = explode(" ", $e[1]);
+            foreach($stageRows as $k => $v) {
+                $stageRows[$k] = trim($v);
+            }
+
             $stageMap[$stageId] = $stageRows;
         }
 
