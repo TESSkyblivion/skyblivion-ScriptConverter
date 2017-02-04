@@ -158,7 +158,7 @@ class QFFragmentFactory
             $stageRows = [];
 
             foreach($stageRowsRaw as $v) {
-                if(!empty(trim($v))) {
+                if(trim($v) != "") {
                     $stageRows[] = trim($v);
                 }
             }
