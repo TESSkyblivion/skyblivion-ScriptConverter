@@ -73,11 +73,7 @@ class BuildScopeCommand implements \Ormin\OBSLexicalParser\Builds\BuildScopeComm
         $variableList = $parsedScript->getVariableDeclarationList();
 
         $globalScope = new TES5GlobalScope($scriptHeader);
-
-        foreach ($this->esmAnalyzer->getGlobalVariables() as $globalVariable) {
-            $globalScope->addGlobalVariable($globalVariable);
-        }
-
+        
         if ($variableList !== null) {
             $this->propertiesFactory->createProperties($variableList, $globalScope);
         }

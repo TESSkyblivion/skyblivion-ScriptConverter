@@ -13,9 +13,11 @@ use Ormin\OBSLexicalParser\Builds\BuildTarget;
 use Ormin\OBSLexicalParser\Builds\BuildTargetCollection;
 use Ormin\OBSLexicalParser\Builds\BuildTargetFactory;
 use Ormin\OBSLexicalParser\Builds\BuildTracker;
+use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
+use Ormin\OBSLexicalParser\TES5\Context\TypeMapper;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5StaticGlobalScopesFactory;
 
 class TranspileChunkJob
@@ -43,6 +45,8 @@ class TranspileChunkJob
      */
     private $staticGlobalScopesFactory;
 
+    private $esmAnalyzer;
+
     /**
      * No injection is done here because of multithreaded enviroment which fucks it up.
      * Maybe at some point we will have a proper DI into the jobs.
@@ -58,6 +62,8 @@ class TranspileChunkJob
         $this->build = new Build($buildPath);
         $this->staticGlobalScopesFactory = new TES5StaticGlobalScopesFactory();
         $this->buildTargets = new BuildTargetCollection();
+        $typeMapper = new TypeMapper();
+        $this->esmAnalyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
     }
 
 
@@ -92,7 +98,7 @@ class TranspileChunkJob
                 $scriptsScopes[] = $staticGlobalScope;
             }
 
-            $multipleScriptsScope = new TES5MultipleScriptsScope($scriptsScopes);
+            $multipleScriptsScope = new TES5MultipleScriptsScope($scriptsScopes, $this->esmAnalyzer->getGlobalVariables());
             $convertedScripts = [];
             foreach($buildChunk as $buildTargetName => $buildScripts) {
 

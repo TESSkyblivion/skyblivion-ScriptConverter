@@ -9,8 +9,16 @@
 namespace Ormin\OBSLexicalParser\TES5\AST\Scope;
 
 
+use Ormin\OBSLexicalParser\TES5\AST\Property\TES5GlobalVariable;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
 
+/**
+ * Defines a scope of multiple scripts
+ * Under this scope, things can interact together , send type-related information between scripts etc.
+ * Also holds global variables list which are registered under these scripts
+ * Class TES5MultipleScriptsScope
+ * @package Ormin\OBSLexicalParser\TES5\AST\Scope
+ */
 class TES5MultipleScriptsScope
 {
 
@@ -20,15 +28,22 @@ class TES5MultipleScriptsScope
     private $globalScopes;
 
     /**
-     * @param TES5GlobalScope[] $globalScopes
+     * @var TES5GlobalVariable[]
      */
-    public function __construct(array $globalScopes) {
+    private $globalVariables;
+
+    /**
+     * @param TES5GlobalScope[] $globalScopes
+     * @param TES5GlobalVariable[] $globalVariables
+     */
+    public function __construct(array $globalScopes, array $globalVariables) {
         $globalScopesMapped = [];
         foreach ($globalScopes as $globalScope) {
             $globalScopesMapped[strtolower($globalScope->getScriptHeader()->getScriptName())] = $globalScope;
         }
 
         $this->globalScopes = $globalScopesMapped;
+        $this->globalVariables = $globalVariables;
 
     }
 
@@ -57,6 +72,27 @@ class TES5MultipleScriptsScope
         return $property;
 
     }
+
+    public function hasGlobalVariable($globalVariableName) {
+        return $this->getGlobalVariableByName($globalVariableName) !== null;
+    }
+
+    /**
+     * @param $globalVariableName
+     * @todo Rewrite to hashmap to lower computational complexity from linear to const
+     * @return null|TES5GlobalVariable
+     */
+    private function getGlobalVariableByName($globalVariableName) {
+        foreach($this->globalVariables as $globalVariable) {
+            if(strtolower($globalVariableName) == strtolower($globalVariable->getName())) {
+                //Token found.
+                return $globalVariable;
+            }
+        }
+
+        return null;
+    }
+
 
 
 

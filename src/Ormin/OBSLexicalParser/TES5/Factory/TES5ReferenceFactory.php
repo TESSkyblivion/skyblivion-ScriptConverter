@@ -116,7 +116,7 @@ class TES5ReferenceFactory
 
                 if ($property === null) {
 
-                    if (!$globalScope->hasGlobalVariable($referenceName)) {
+                    if (!$multipleScriptsScope->hasGlobalVariable($referenceName)) {
                         $property = new TES5Property($referenceName, TES5BasicType::T_FORM(), $referenceName);
                     } else {
                         $property = new TES5Property($referenceName, TES5BasicType::T_GLOBALVARIABLE(), $referenceName);
