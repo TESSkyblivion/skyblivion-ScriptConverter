@@ -105,6 +105,12 @@ class ESMAnalyzer
                 $globalArray[] = new TES5GlobalVariable($global);
             }
 
+            /**
+             * Hacky - add infamy into the globals array
+             * Probably we should extract this from this class and put this into other place
+             */
+            $globalArray[] = new TES5GlobalVariable('Infamy');
+
             $this->globals = $globalArray;
 
         }
