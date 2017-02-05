@@ -77,18 +77,19 @@ class TranspileChunkJob
              */
             $scriptsScopes = [];
 
+            $globalVariables = $this->esmAnalyzer->getGlobalVariables();
+
             /**
-             * First, build the scripts scope
+             * First, build the scripts global scopes
              */
             foreach($buildChunk as $buildTargetName => $buildScripts) {
 
                 $buildTarget = $this->getBuildTarget($buildTargetName);
 
                 foreach($buildScripts as $buildScript) {
-                    //Is that even needed here?
                     $scriptName = pathinfo($buildScript, PATHINFO_FILENAME);
                     $sourcePath = $buildTarget->getSourceFromPath($scriptName);
-                    $scriptsScopes[$scriptName] = $buildTarget->buildScope($sourcePath);
+                    $scriptsScopes[$scriptName] = $buildTarget->buildScope($sourcePath, $globalVariables);
                 }
             }
 
@@ -98,7 +99,7 @@ class TranspileChunkJob
                 $scriptsScopes[] = $staticGlobalScope;
             }
 
-            $multipleScriptsScope = new TES5MultipleScriptsScope($scriptsScopes, $this->esmAnalyzer->getGlobalVariables());
+            $multipleScriptsScope = new TES5MultipleScriptsScope($scriptsScopes, $globalVariables);
             $convertedScripts = [];
             foreach($buildChunk as $buildTargetName => $buildScripts) {
 

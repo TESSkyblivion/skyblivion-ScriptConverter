@@ -7,6 +7,7 @@
 namespace Ormin\OBSLexicalParser\Builds\TIF;
 
 use Ormin\OBSLexicalParser\Input\FragmentsReferencesBuilder;
+use Ormin\OBSLexicalParser\TES5\AST\Property\Collection\TES5GlobalVariables;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\TES5ScriptHeader;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5PropertiesFactory;
@@ -37,7 +38,7 @@ class BuildScopeCommand implements \Ormin\OBSLexicalParser\Builds\BuildScopeComm
         $this->propertiesFactory = new TES5PropertiesFactory();
     }
 
-    public function buildScope($sourcePath)
+    public function buildScope($sourcePath, TES5GlobalVariables $globalVariables)
     {
         $scriptName = pathinfo($sourcePath, PATHINFO_FILENAME);
         $referencesPath = pathinfo($sourcePath, PATHINFO_DIRNAME). "/" .$scriptName.".references";
@@ -47,7 +48,7 @@ class BuildScopeCommand implements \Ormin\OBSLexicalParser\Builds\BuildScopeComm
         $globalScope = new TES5GlobalScope($scriptHeader);
         $variableList = $this->fragmentsReferencesBuilder->buildVariableDeclarationList($referencesPath);
         if ($variableList !== null) {
-            $this->propertiesFactory->createProperties($variableList, $globalScope);
+            $this->propertiesFactory->createProperties($variableList, $globalScope, $globalVariables);
         }
 
 

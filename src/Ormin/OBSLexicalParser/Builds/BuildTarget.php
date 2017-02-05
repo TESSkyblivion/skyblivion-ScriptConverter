@@ -5,6 +5,7 @@
  */
 
 namespace Ormin\OBSLexicalParser\Builds;
+use Ormin\OBSLexicalParser\TES5\AST\Property\Collection\TES5GlobalVariables;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
@@ -142,14 +143,19 @@ class BuildTarget
         return $this->ASTCommand->getAST($sourcePath);
     }
 
-    public function buildScope($sourcePath)
+    /**
+     * @param string $sourcePath
+     * @param TES5GlobalVariables $globalVariables
+     * @return TES5GlobalScope
+     */
+    public function buildScope($sourcePath, TES5GlobalVariables $globalVariables)
     {
         if (!$this->scopeInitialized) {
             $this->buildScopeCommand->initialize();
             $this->scopeInitialized = true;
         }
 
-        return $this->buildScopeCommand->buildScope($sourcePath);
+        return $this->buildScopeCommand->buildScope($sourcePath, $globalVariables);
     }
 
     public function write(BuildTracker $buildTracker)

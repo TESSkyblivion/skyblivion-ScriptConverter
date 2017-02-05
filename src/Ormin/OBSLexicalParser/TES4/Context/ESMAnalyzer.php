@@ -6,6 +6,7 @@
 
 namespace Ormin\OBSLexicalParser\TES4\Context;
 
+use Ormin\OBSLexicalParser\TES5\AST\Property\Collection\TES5GlobalVariables;
 use Ormin\OBSLexicalParser\TES5\AST\Property\TES5GlobalVariable;
 use Ormin\OBSLexicalParser\TES5\Context\TypeMapper;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
@@ -50,7 +51,7 @@ class ESMAnalyzer
     private $scriptTypes;
 
     /**
-     * @var array
+     * @var TES5GlobalVariables
      */
     private $globals;
 
@@ -111,7 +112,7 @@ class ESMAnalyzer
              */
             $globalArray[] = new TES5GlobalVariable('Infamy');
 
-            $this->globals = $globalArray;
+            $this->globals = new TES5GlobalVariables($globalArray);
 
         }
 
@@ -137,7 +138,7 @@ class ESMAnalyzer
     }
 
     /**
-     * @return array
+     * @return TES5GlobalVariables
      */
     public function getGlobalVariables()
     {

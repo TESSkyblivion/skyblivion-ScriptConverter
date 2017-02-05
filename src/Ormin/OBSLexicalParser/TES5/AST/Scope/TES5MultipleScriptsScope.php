@@ -9,6 +9,7 @@
 namespace Ormin\OBSLexicalParser\TES5\AST\Scope;
 
 
+use Ormin\OBSLexicalParser\TES5\AST\Property\Collection\TES5GlobalVariables;
 use Ormin\OBSLexicalParser\TES5\AST\Property\TES5GlobalVariable;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
 
@@ -34,9 +35,9 @@ class TES5MultipleScriptsScope
 
     /**
      * @param TES5GlobalScope[] $globalScopes
-     * @param TES5GlobalVariable[] $globalVariables
+     * @param TES5GlobalVariables $globalVariables
      */
-    public function __construct(array $globalScopes, array $globalVariables) {
+    public function __construct(array $globalScopes, TES5GlobalVariables $globalVariables) {
         $globalScopesMapped = [];
         foreach ($globalScopes as $globalScope) {
             $globalScopesMapped[strtolower($globalScope->getScriptHeader()->getScriptName())] = $globalScope;
@@ -74,26 +75,7 @@ class TES5MultipleScriptsScope
     }
 
     public function hasGlobalVariable($globalVariableName) {
-        return $this->getGlobalVariableByName($globalVariableName) !== null;
+        return $this->globalVariables->hasGlobalVariable($globalVariableName);
     }
-
-    /**
-     * @param $globalVariableName
-     * @todo Rewrite to hashmap to lower computational complexity from linear to const
-     * @return null|TES5GlobalVariable
-     */
-    private function getGlobalVariableByName($globalVariableName) {
-        foreach($this->globalVariables as $globalVariable) {
-            if(strtolower($globalVariableName) == strtolower($globalVariable->getName())) {
-                //Token found.
-                return $globalVariable;
-            }
-        }
-
-        return null;
-    }
-
-
-
 
 }

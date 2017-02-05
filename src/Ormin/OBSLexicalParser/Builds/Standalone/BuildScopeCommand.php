@@ -9,6 +9,7 @@ namespace Ormin\OBSLexicalParser\Builds\Standalone;
 
 use Ormin\OBSLexicalParser\TES4\AST\TES4Script;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
+use Ormin\OBSLexicalParser\TES5\AST\Property\Collection\TES5GlobalVariables;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\TES5ScriptHeader;
 use Ormin\OBSLexicalParser\TES5\Context\TypeMapper;
@@ -66,7 +67,7 @@ class BuildScopeCommand implements \Ormin\OBSLexicalParser\Builds\BuildScopeComm
     }
 
 
-    public function buildScope($scriptPath)
+    public function buildScope($scriptPath, TES5GlobalVariables $globalVariables)
     {
         $parsedScript = $this->standaloneParsingService->parseScript($scriptPath);
         $scriptHeader = $this->createHeader($parsedScript);
@@ -75,7 +76,7 @@ class BuildScopeCommand implements \Ormin\OBSLexicalParser\Builds\BuildScopeComm
         $globalScope = new TES5GlobalScope($scriptHeader);
         
         if ($variableList !== null) {
-            $this->propertiesFactory->createProperties($variableList, $globalScope);
+            $this->propertiesFactory->createProperties($variableList, $globalScope, $globalVariables);
         }
 
         return $globalScope;
