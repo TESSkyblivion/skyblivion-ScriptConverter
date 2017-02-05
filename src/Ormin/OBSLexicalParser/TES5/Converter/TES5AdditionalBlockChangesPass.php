@@ -117,6 +117,8 @@ class TES5AdditionalBlockChangesPass {
                 $function = $this->valueFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "RegisterForSingleUpdate", $multipleScriptsScope, $args);
                 $newInitBlock->addChunk($function);
                 $blockList->add($newInitBlock);
+                
+                $newBlock->addChunk($function);
 
 
                 break;

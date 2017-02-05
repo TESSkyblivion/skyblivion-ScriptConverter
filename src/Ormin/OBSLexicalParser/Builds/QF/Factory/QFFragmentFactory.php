@@ -42,6 +42,7 @@ class QFFragmentFactory
     public function joinQFFragments(BuildTarget $target, $resultingFragmentName, array $subfragmentsTrees)
     {
         $stageMap = $this->buildStageMap($target, $resultingFragmentName);
+
         /**
          * We need script fragment for objective handling for each stage, so when parsing the script fragments,
          * we'll be marking them there, and intersecting this with stage.
@@ -60,6 +61,27 @@ class QFFragmentFactory
         $resultingBlockList = new TES5BlockList();
 
         $resultingGlobalScope = new TES5GlobalScope($resultingScriptHeader);
+
+        /**
+         * Add ReferenceAlias'es
+         * At some point, we might port the conversion so it doesn't use the directly injected property,
+         * but instead has a map to aliases and we'll map accordingly and have references point to aliases instead
+         */
+        $sourcePath = $target->getSourceFromPath($resultingFragmentName);
+        $scriptName = pathinfo($sourcePath, PATHINFO_FILENAME);
+        $aliasesFile = pathinfo($sourcePath, PATHINFO_DIRNAME). "/" .$scriptName.".aliases";
+        $aliasesContent = file($aliasesFile);
+
+        foreach($aliasesContent as $alias) {
+            $alias = trim($alias);
+            if(empty($alias)) {
+                continue;
+            }
+
+            $resultingGlobalScope->add(
+                new TES5Property($alias, TES5BasicType::T_REFERENCEALIAS(), $alias)
+            );
+        }
 
         $propertiesNamesDeclared = [];
 
