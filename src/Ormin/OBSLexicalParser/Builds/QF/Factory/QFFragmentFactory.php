@@ -71,6 +71,8 @@ class QFFragmentFactory
         $scriptName = pathinfo($sourcePath, PATHINFO_FILENAME);
         $aliasesFile = pathinfo($sourcePath, PATHINFO_DIRNAME). "/" .$scriptName.".aliases";
         $aliasesContent = file($aliasesFile);
+        $aliasesDeclared = [];
+
 
         foreach($aliasesContent as $alias) {
             $alias = trim($alias);
@@ -78,9 +80,16 @@ class QFFragmentFactory
                 continue;
             }
 
+            if(isset($aliasesDeclared[$alias]))
+            {
+                continue;
+            }
+
             $resultingGlobalScope->add(
                 new TES5Property($alias, TES5BasicType::T_REFERENCEALIAS(), $alias)
             );
+
+            $aliasesDeclared[$alias] = true;
         }
 
         $propertiesNamesDeclared = [];
