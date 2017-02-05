@@ -32,6 +32,29 @@ class WriteCommand implements \Ormin\OBSLexicalParser\Builds\WriteCommand
         $jointScripts = [];
 
         /**
+         * Scan manually for .map files in the QF scripts folder
+         * Reason is that in case we've got a quest with no fragments to anything whatsoever, we'll have to go
+         * through it too ( just with empty subfragments trees ), to generate the objective handlings
+         */
+        $sourcePath = $target->getSourcePath();
+        $scan = scandir($sourcePath);
+
+        foreach($scan as $mapCandidate)
+        {
+            if(!is_file($mapCandidate)) continue;
+
+            $path = $sourcePath . $mapCandidate;
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            if($extension == "map") {
+                $baseName = pathinfo($sourcePath, PATHINFO_FILENAME);
+
+                if(!isset($jointScripts[$baseName])) {
+                    $jointScripts[$baseName] = [];
+                }
+            }
+        }
+
+        /**
          * Group the fragments together
          */
         foreach($scripts as $script)
