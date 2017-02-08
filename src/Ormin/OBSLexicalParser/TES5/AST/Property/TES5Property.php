@@ -54,7 +54,8 @@ class TES5Property implements TES5Variable
     public function output()
     {
         $propertyType = $this->getPropertyType()->output();
-        return [$propertyType . ' Property ' . $this->propertyName . ' Auto'];
+        //Todo - Actually differentiate between properties which need and do not need to be conditional
+        return [$propertyType . ' Property ' . $this->propertyName . ' Auto Conditional'];
     }
 
     /**
