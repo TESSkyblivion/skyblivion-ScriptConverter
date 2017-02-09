@@ -25,6 +25,7 @@ use Ormin\OBSLexicalParser\TES5\AST\Code\TES5Filler;
 use Ormin\OBSLexicalParser\TES5\AST\Expression\Operators\TES5ArithmeticExpressionOperator;
 use Ormin\OBSLexicalParser\TES5\AST\Expression\Operators\TES5BinaryExpressionOperator;
 use Ormin\OBSLexicalParser\TES5\AST\Expression\Operators\TES5LogicalExpressionOperator;
+use Ormin\OBSLexicalParser\TES5\AST\Object\TES5PlayerReference;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5Referencer;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCall;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
@@ -547,7 +548,9 @@ class TES5ValueFactory
         $functionName = $function->getFunctionCall()->getFunctionName();
         $functionArguments = $function->getArguments();
 
-        switch (strtolower($functionName)) {
+        $calledFunctionName = strtolower($functionName);
+
+        switch ($calledFunctionName) {
 
             case "activate": {
 
@@ -1977,6 +1980,14 @@ class TES5ValueFactory
             case "modactorvalue":
             case "modav": {
 
+                if($calledFunctionName == "modpcskill")
+                {
+                    /**
+                     * MODPCSkill means we will need to call upon the player object
+                     */
+                    $calledOn = $this->referenceFactory->createReferenceToPlayer();
+                }
+
                 $convertedArguments = new TES5ObjectCallArguments();
 
                 $firstArg = $functionArguments->getValue(0);
@@ -1998,6 +2009,9 @@ class TES5ValueFactory
                         }
 
                         $functionName = "SetValue";
+                        /**
+                         *  Switch out callee with the reference to attr
+                         */
                         $calledOn = $this->referenceFactory->createReference('TES4Attr' . ucwords(strtolower($firstArg->getData())),
                             $globalScope,
                             $multipleScriptsScope,
