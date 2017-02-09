@@ -74,7 +74,7 @@ class TES5ScriptHeader implements TES5Outputtable  {
         if($this->isHidden) {
             return ['ScriptName '.$this->scriptNamePrefix.$this->scriptName.' extends '.$this->scriptType->getNativeType()->output().' Hidden'];
         } else {
-            return ['ScriptName '.$this->scriptNamePrefix.$this->scriptName.' extends '.$this->scriptType->getNativeType()->output()];
+            return ['ScriptName '.$this->scriptNamePrefix.$this->scriptName.' extends '.$this->scriptType->getNativeType()->output().' Conditional'];
         }
     }
 
