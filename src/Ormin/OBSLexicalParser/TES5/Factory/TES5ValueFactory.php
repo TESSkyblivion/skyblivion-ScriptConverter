@@ -32,6 +32,7 @@ use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5Reference;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5SelfReference;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5StaticReference;
+use Ormin\OBSLexicalParser\TES5\AST\Property\TES5Property;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
@@ -586,15 +587,15 @@ class TES5ValueFactory
                 break;
             }
             case "addscriptpackage": {
-                $md5 = 'sp_' . substr(md5($globalScope->getScriptHeader()->getScriptName() . $functionArguments->getValue(0)->getData()), 0, 16);
+                $md5 = 'TES4SCENE_' . substr(md5($calledOn->getReferencesTo()->getReferenceEdid() . $functionArguments->getValue(0)->getData()), 0, 16);
 
-                $this->metadataLogService->add('ADDSCRIPTPACKAGE_SWITCH', [$globalScope->getScriptHeader()->getScriptName(), $functionArguments->getValue(0)->getData(), $md5]);
+                $this->metadataLogService->add('ADD_SCRIPT_SCENE', [$functionArguments->getValue(0)->getData(), $md5]);
                 $reference = $this->referenceFactory->createReference($md5, $globalScope, $multipleScriptsScope, $localScope);
-
                 $funcArgs = new TES5ObjectCallArguments();
-                $funcArgs->add(new TES5Integer(1));
-
-                return $this->createObjectCall($reference, "SetValue",$multipleScriptsScope, $funcArgs);
+                /**
+                 * Force start because in oblivion double using AddScriptPackage would actually overwrite the script package, so we mimic this
+                 */
+                return $this->createObjectCall($reference, "ForceStart",$multipleScriptsScope, $funcArgs);
 
                 break;
             }
@@ -3073,7 +3074,22 @@ class TES5ValueFactory
                 break;
             }
             case "startconversation": {
-                //todo
+                /**
+                $md5 = 'TES4SCENE_' . substr(md5($calledOn->getReferencesTo()->getReferenceEdid() . $functionArguments->getValue(0)->getData()), 0, 16);
+                $sceneData = [$md5, $functionArguments->getValue(0)->getData()];
+                if($functionArguments->getValue(1) !== null)
+                {
+                $sceneData[] = $functionArguments->getValue(1)->getData();
+                }
+
+                $this->metadataLogService->add('ADD_FORCEGREET_SCENE', $sceneData);
+                $reference = $this->referenceFactory->createReference($md5, $globalScope, $multipleScriptsScope, $localScope);
+                $funcArgs = new TES5ObjectCallArguments();
+                /**
+                 * Force start because in oblivion double using AddScriptPackage would actually overwrite the script package, so we mimic this
+                return $this->createObjectCall($reference, "ForceStart",$multipleScriptsScope, $funcArgs);
+                */
+
                 return new TES5Filler();
                 break;
             }
@@ -3108,9 +3124,31 @@ class TES5ValueFactory
                 break;
             }
             case "stopquest": {
-                $calledOn = $this->createReadReference($functionArguments->popValue(0)->getData(), $globalScope, $multipleScriptsScope, $localScope);
+                $questName = $functionArguments->popValue(0)->getData();
+                $calledOn = $this->createReadReference($questName, $globalScope, $multipleScriptsScope, $localScope);
                 $functionName = "Stop";
-                return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
+                $ret = [$this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope))];
+
+                /**
+                 * Basically, there are some ugly mechanics in Oblivion.
+                 * Two quests ( FGInterimConversation and Arena* quest group ) are repeadetely started and stopped
+                 * However, Skyrim does not support this - once 0x13A byte is marked in a TESQuest, it won't allow
+                 * to be started again. Hence, we need to call a Papyrus endpoint to reset this field, and be able
+                 * to reset the quest completely.
+                 */
+                if( $questName == "FGInterimConversation" ||
+                    $questName == "ArenaIC" ||
+                    $questName == "ArenaICGrandChampion" ||
+                    $questName == "ArenaAggression" ||
+                    $questName == "ArenaAnnouncer" ||
+                    $questName == "ArenaDisqualification" ||
+                    $questName == "Arena"
+                   ) {
+                    $ret[] = $this->createObjectCall($calledOn, "PrepareForReinitializing", $multipleScriptsScope, new TES5ObjectCallArguments());
+                }
+
+                return $ret;
+
                 break;
             }
 

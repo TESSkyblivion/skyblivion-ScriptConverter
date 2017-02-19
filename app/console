@@ -16,4 +16,5 @@ $application = new Application();
 $application->add(new \Ormin\OBSLexicalParser\Commands\BuildTargetCommand());
 $application->add(new \Ormin\OBSLexicalParser\Commands\BuildScriptCommand());
 $application->add(new \Ormin\OBSLexicalParser\Commands\BuildInteroperableCompilationGraphs());
+$application->add(new \Ormin\OBSLexicalParser\Commands\TestStageMap());
 $application->run();

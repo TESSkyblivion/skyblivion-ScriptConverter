@@ -6,6 +6,7 @@
 
 namespace Ormin\OBSLexicalParser\Builds\Standalone;
 
+use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\TES4\AST\TES4Target;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
@@ -53,12 +54,12 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
         $this->parserService = $standaloneParsingService;
     }
 
-    public function initialize()
+    public function initialize(Build $build)
     {
         $typeMapper = new TypeMapper();
         $analyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
         $primitiveValueFactory = new TES5PrimitiveValueFactory();
-        $metadataLogService = new MetadataLogService('TestMetadata');
+        $metadataLogService = new MetadataLogService($build);
         $blockLocalScopeFactory = new TES5BlockFunctionScopeFactory();
         $codeScopeFactory = new TES5CodeScopeFactory();
         $expressionFactory = new TES5ExpressionFactory();

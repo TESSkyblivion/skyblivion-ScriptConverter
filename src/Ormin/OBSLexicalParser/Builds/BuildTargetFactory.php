@@ -11,6 +11,7 @@ namespace Ormin\OBSLexicalParser\Builds;
 
 use Ormin\OBSLexicalParser\Builds\QF\Factory\ObjectiveHandlingFactory;
 use Ormin\OBSLexicalParser\Builds\QF\Factory\QFFragmentFactory;
+use Ormin\OBSLexicalParser\Builds\QF\Factory\Service\MappedTargetsLogService;
 use Ormin\OBSLexicalParser\Builds\Service\FragmentsParsingService;
 use Ormin\OBSLexicalParser\Builds\Service\StandaloneParsingService;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
@@ -112,7 +113,7 @@ class BuildTargetFactory
                 $typeMapper = new TypeMapper();
                 $analyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
                 $primitiveValueFactory = new TES5PrimitiveValueFactory();
-                $metadataLogService = new MetadataLogService('TestMetadata');
+                $metadataLogService = new MetadataLogService($build);
                 $codeScopeFactory = new TES5CodeScopeFactory();
                 $expressionFactory = new TES5ExpressionFactory();
                 $typeInferencer = new TES5TypeInferencer($analyzer,'./BuildTargets/Standalone/Source/');
@@ -141,6 +142,7 @@ class BuildTargetFactory
                     new \Ormin\OBSLexicalParser\Builds\QF\WriteCommand(
 
                         new QFFragmentFactory(
+                            new MappedTargetsLogService($build),
                             new ObjectiveHandlingFactory(
                                 new TES5FragmentFunctionScopeFactory(),
                                 $codeScopeFactory,

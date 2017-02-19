@@ -8,6 +8,8 @@
 namespace Ormin\OBSLexicalParser\Builds\QF\Factory;
 
 
+use Ormin\OBSLexicalParser\Builds\QF\Factory\Map\StageMap;
+use Ormin\OBSLexicalParser\Builds\QF\Factory\Service\MappedTargetsLogService;
 use Ormin\OBSLexicalParser\TES5\AST\Block\TES5BlockList;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Script;
@@ -22,12 +24,18 @@ use Ormin\OBSLexicalParser\TES5\AST\TES5ScriptHeader;
 class QFFragmentFactory
 {
     /**
+     * @var MappedTargetsLogService
+     */
+    private $mappedTargetsLogService;
+
+    /**
      * @var ObjectiveHandlingFactory
      */
     private $objectiveHandlingFactory;
 
-    public function __construct(ObjectiveHandlingFactory $objectiveHandlingFactory)
+    public function __construct(MappedTargetsLogService $mappedTargetsLogService, ObjectiveHandlingFactory $objectiveHandlingFactory)
     {
+        $this->mappedTargetsLogService = $mappedTargetsLogService;
         $this->objectiveHandlingFactory = $objectiveHandlingFactory;
     }
     
@@ -137,7 +145,7 @@ class QFFragmentFactory
             }
             $subfragmentBlock->getFunctionScope()->renameTo($newFragmentFunctionName);
 
-            $objectiveCodeChunks = $this->objectiveHandlingFactory->generateObjectiveHandling($subfragmentBlock, $resultingGlobalScope, $stageMap[$subfragment->getStage()]);
+            $objectiveCodeChunks = $this->objectiveHandlingFactory->generateObjectiveHandling($subfragmentBlock, $resultingGlobalScope, $stageMap->getStageTargetsMap($subfragment->getStage()));
 
             foreach ($objectiveCodeChunks as $newCodeChunk) {
                 $subfragmentBlock->addChunk($newCodeChunk);
@@ -150,12 +158,17 @@ class QFFragmentFactory
         /**
          * Diff to find stages which we still need to mark
          */
-        $nonDoneStages = array_diff(array_keys($stageMap), array_keys($implementedStages));
+        $nonDoneStages = array_diff($stageMap->getStageIds(), array_keys($implementedStages));
 
         foreach($nonDoneStages as $nonDoneStage)
         {
-            $fragment = $this->objectiveHandlingFactory->createEnclosedFragment($resultingGlobalScope, $nonDoneStage, $stageMap[$nonDoneStage]);
+            $fragment = $this->objectiveHandlingFactory->createEnclosedFragment($resultingGlobalScope, $nonDoneStage, $stageMap->getStageTargetsMap($nonDoneStage));
             $resultingBlockList->add($fragment);
+        }
+
+
+        foreach($stageMap->getMappedTargetsIndex() as $originalTargetIndex => $mappedTargetIndexes) {
+            $this->mappedTargetsLogService->add($originalTargetIndex, $mappedTargetIndexes);
         }
 
         $resultingTree = new TES5Script($resultingGlobalScope, $resultingBlockList);
@@ -197,6 +210,6 @@ class QFFragmentFactory
             $stageMap[$stageId] = $stageRows;
         }
 
-        return $stageMap;
+        return new StageMap($stageMap);
     }
 }

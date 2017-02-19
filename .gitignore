@@ -1,4 +1,5 @@
 .idea/
 BuildTargets/
+Build/
 vendor/
 Oblivion.esm

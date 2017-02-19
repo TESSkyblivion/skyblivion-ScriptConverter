@@ -114,7 +114,7 @@ class BuildTarget
     {
 
         if (!$this->transpileInitialized) {
-            $this->transpileCommand->initialize();
+            $this->transpileCommand->initialize($this->build);
             $this->transpileInitialized = true;
         }
 

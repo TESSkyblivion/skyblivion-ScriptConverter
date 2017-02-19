@@ -6,6 +6,7 @@
 
 namespace Ormin\OBSLexicalParser\Builds\TIF;
 
+use Ormin\OBSLexicalParser\Builds\Build;
 use Ormin\OBSLexicalParser\Builds\Service\FragmentsParsingService;
 use Ormin\OBSLexicalParser\Input\FragmentsReferencesBuilder;
 use Ormin\OBSLexicalParser\TES4\AST\TES4FragmentTarget;
@@ -59,12 +60,12 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
         $this->parsingService = $fragmentsParsingService;
     }
 
-    public function initialize()
+    public function initialize(Build $build)
     {
         $typeMapper = new TypeMapper();
         $analyzer = new ESMAnalyzer($typeMapper,'Oblivion.esm');
         $primitiveValueFactory = new TES5PrimitiveValueFactory();
-        $metadataLogService = new MetadataLogService('TestMetadata');
+        $metadataLogService = new MetadataLogService($build);
         $blockLocalScopeFactory = new TES5BlockFunctionScopeFactory();
         $codeScopeFactory = new TES5CodeScopeFactory();
         $expressionFactory = new TES5ExpressionFactory();
