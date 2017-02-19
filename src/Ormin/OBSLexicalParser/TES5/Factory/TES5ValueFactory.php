@@ -587,7 +587,7 @@ class TES5ValueFactory
                 break;
             }
             case "addscriptpackage": {
-                $md5 = 'TES4SCENE_' . substr(md5($calledOn->getReferencesTo()->getReferenceEdid() . $functionArguments->getValue(0)->getData()), 0, 16);
+                $md5 = 'TES4SCENE_' . substr(md5($calledOn->getReferencesTo()->getPropertyName() . $functionArguments->getValue(0)->getData()), 0, 16);
 
                 $this->metadataLogService->add('ADD_SCRIPT_SCENE', [$functionArguments->getValue(0)->getData(), $md5]);
                 $reference = $this->referenceFactory->createReference($md5, $globalScope, $multipleScriptsScope, $localScope);
