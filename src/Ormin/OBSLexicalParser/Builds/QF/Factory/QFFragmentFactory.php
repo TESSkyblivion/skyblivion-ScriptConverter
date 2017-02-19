@@ -167,6 +167,8 @@ class QFFragmentFactory
         }
 
 
+        $this->mappedTargetsLogService->writeScriptName($resultingFragmentName);
+        
         foreach($stageMap->getMappedTargetsIndex() as $originalTargetIndex => $mappedTargetIndexes) {
             $this->mappedTargetsLogService->add($originalTargetIndex, $mappedTargetIndexes);
         }

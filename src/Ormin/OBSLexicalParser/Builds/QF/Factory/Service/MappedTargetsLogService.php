@@ -15,6 +15,11 @@ class MappedTargetsLogService
         $this->handle = fopen($filename,'w+');
     }
 
+    public function writeScriptName($scriptName) {
+        fwrite($this->handle,$scriptName.PHP_EOL);
+    }
+
+
     public function add($originalTargetIndex,$mappedTargetIndexes = []) {
         fwrite($this->handle,$originalTargetIndex.' '.implode('	',$mappedTargetIndexes).PHP_EOL);
     }
