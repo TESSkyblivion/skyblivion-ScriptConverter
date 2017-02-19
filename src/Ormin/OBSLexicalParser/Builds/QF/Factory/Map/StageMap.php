@@ -60,20 +60,16 @@ class StageMap
 
                             $mappedTargetsIndex[$targetIndex][] = $nextFreeIndex;
 
-                            echo 'Filling up, stage id '.$stageId.' and index '.$targetIndex.PHP_EOL;
                             $fillInValue = 0;
                             foreach($resultStageMap as $resultStageId => $resultRows) {
 
                                 //This stage id marks the start of the block, so we switch the fillin value
                                 if($resultStageId == $stageId) {
-                                    echo 'Switching on filling at stage id '.$resultStageId.PHP_EOL;
                                     $fillInValue = 1;
                                 }
 
                                 //Check if this stage id result is 0, if so - switch out the block
                                 if(!$stageMap[$resultStageId][$targetIndex]) {
-//                                if(!$resultRows[$targetIndex]) {
-                                    echo 'Switching off filling at stage id '.$resultStageId.PHP_EOL;
                                     $fillInValue = 0;
                                 }
 
