@@ -3126,15 +3126,13 @@ class TES5ValueFactory
             case "stopquest": {
                 $questName = $functionArguments->popValue(0)->getData();
                 $calledOn = $this->createReadReference($questName, $globalScope, $multipleScriptsScope, $localScope);
-                $functionName = "Stop";
-                $ret = [$this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope))];
 
                 /**
                  * Basically, there are some ugly mechanics in Oblivion.
                  * Two quests ( FGInterimConversation and Arena* quest group ) are repeadetely started and stopped
                  * However, Skyrim does not support this - once 0x13A byte is marked in a TESQuest, it won't allow
-                 * to be started again. Hence, we need to call a Papyrus endpoint to reset this field, and be able
-                 * to reset the quest completely.
+                 * to be started again. Hence, we need to call a Papyrus endpoint to stop the quest and
+                 * reset this field, and be able to reset the quest completely.
                  */
                 if( $questName == "FGInterimConversation" ||
                     $questName == "ArenaIC" ||
@@ -3144,10 +3142,10 @@ class TES5ValueFactory
                     $questName == "ArenaDisqualification" ||
                     $questName == "Arena"
                    ) {
-                    $ret[] = $this->createObjectCall($calledOn, "PrepareForReinitializing", $multipleScriptsScope, new TES5ObjectCallArguments());
+                    return $this->createObjectCall($calledOn, "PrepareForReinitializing", $multipleScriptsScope, new TES5ObjectCallArguments());
+                } else {
+                    return $this->createObjectCall($calledOn, "Stop",$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
                 }
-
-                return $ret;
 
                 break;
             }
