@@ -7631,6 +7631,13 @@ class TES5InheritanceGraphAnalyzer
                             ),
                         'returnType' => 'bool',
                     ),
+                'PrepareForReinitializing' =>
+                    array (
+                        'args' =>
+                            array (
+                            ),
+                        'returnType' => 'bool',
+                    ),										
                 'Reset' =>
                     array (
                         'args' =>
