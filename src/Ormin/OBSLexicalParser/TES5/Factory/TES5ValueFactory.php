@@ -25,14 +25,12 @@ use Ormin\OBSLexicalParser\TES5\AST\Code\TES5Filler;
 use Ormin\OBSLexicalParser\TES5\AST\Expression\Operators\TES5ArithmeticExpressionOperator;
 use Ormin\OBSLexicalParser\TES5\AST\Expression\Operators\TES5BinaryExpressionOperator;
 use Ormin\OBSLexicalParser\TES5\AST\Expression\Operators\TES5LogicalExpressionOperator;
-use Ormin\OBSLexicalParser\TES5\AST\Object\TES5PlayerReference;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5Referencer;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCall;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5Reference;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5SelfReference;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5StaticReference;
-use Ormin\OBSLexicalParser\TES5\AST\Property\TES5Property;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5LocalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
@@ -40,6 +38,7 @@ use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Bool;
 use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Float;
 use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Integer;
 use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5None;
+use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Primitive;
 use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5String;
 use Ormin\OBSLexicalParser\TES5\Context\TES5LocalVariableParameterMeaning;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
@@ -375,13 +374,34 @@ class TES5ValueFactory
             if ($tes5set[0]->getType() == $objectReferenceType || TES5InheritanceGraphAnalyzer::isExtending($tes5set[0]->getType(), $objectReferenceType)) {
 
                 if ($tes5set[1]->getType() == TES5BasicType::T_INT()) {
-                    $tes5set[0] = $this->createObjectCall($tes5set[0], "GetFormID",$multipleScriptsScope);
 
-                    return $this->expressionFactory->createArithmeticExpression(
-                        $tes5set[0],
-                        $operator,
-                        $tes5set[1]
-                    );
+                    //Perhaps we should allow to try to cast upwards for primitives, ->asPrimitive() or similar
+                    //In case we do know at compile time that we're comparing against zero, then we can assume
+                    //we can compare against None, which allows us not call GetFormID() on most probably None object
+					if($tes5set[1] instanceof TES5Primitive && $tes5set[1]->getValue() == 0) {
+
+                        if($operator == TES5ArithmeticExpressionOperator::OPERATOR_EQUAL()) {
+                            $targetOperator = $operator;
+                        } else {
+                            $targetOperator = TES5ArithmeticExpressionOperator::OPERATOR_NOT_EQUAL();
+                        }
+
+                        return $this->expressionFactory->createArithmeticExpression(
+                            $tes5set[0],
+                            $targetOperator,
+                            new TES5None()
+                        );
+
+
+                    } else {
+                        $tes5set[0] = $this->createObjectCall($tes5set[0], "GetFormID", $multipleScriptsScope);
+
+                        return $this->expressionFactory->createArithmeticExpression(
+                            $tes5set[0],
+                            $operator,
+                            $tes5set[1]
+                        );
+                    }
 
                 }
 
@@ -933,14 +953,78 @@ class TES5ValueFactory
             }
 
             case "getav":
-            case "getactorvalue": {
+            case "getactorvalue":
+            case "getbaseactorvalue":
+            case "getbaseav": {			
                 //@TODO - This should be fixed on expression-parsing level, with agression and confidence checks adjusted accordingly. There are no retail uses, so im not doing this for now ;)
 
+				$firstArg = $functionArguments->getValue(0);
                 $convertedArguments = new TES5ObjectCallArguments();
-                $convertedArguments->add(new TES5String($functionArguments->getValue(0)->getData()));
+                switch (strtolower($firstArg->getData())) {
 
-                return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
-                break;
+                    case 'strength':
+                    case 'intelligence':
+                    case 'willpower':
+                    case 'agility':
+                    case 'speed':
+                    case 'endurance':
+                    case 'personality':
+                    case 'luck': {
+
+                        if ($calledOn->getName() != "player") {
+                            //We can't convert those.. and shouldn't be any, too.
+                            throw new ConversionException("[ModAV] Cannot get attributes on non-player");
+                        }
+
+                        /**
+                         *  Switch out callee with the reference to attr
+                         */
+                        return $this->createReadReference('TES4Attr' . ucwords(strtolower($firstArg->getData())),
+                            $globalScope,
+                            $multipleScriptsScope,
+                            $localScope);							
+
+                    }
+
+                    case 'fatigue': {
+                        $convertedArguments->add(new TES5String('Stamina'));                       
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+
+                    case 'armorer': {
+                        $convertedArguments->add(new TES5String("Smithing"));
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+
+                    case 'security': {
+                        $convertedArguments->add(new TES5String("Lockpicking"));
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+
+					case 'mercantile': {
+                        $convertedArguments->add(new TES5String("Speechcraft"));
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+
+                    case 'mysticism': { //It doesn't exist in Skyrim - defaulting to Illusion..
+
+                        $convertedArguments->add(new TES5String("Illusion"));
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+
+                    case 'blade':
+                    case 'blunt': {
+                        $convertedArguments->add(new TES5String("OneHanded"));
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+
+                    default: {
+                        $convertedArguments->add(new TES5String($firstArg->getData()));
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+
+                }				
+				
             }
             case "getamountsoldstolen": {
                 $calledOn = new TES5StaticReference("Game");
@@ -983,13 +1067,6 @@ class TES5ValueFactory
                 break;
             }
 
-            case "getbaseactorvalue":
-            case "getbaseav": {
-                //@TODO - Implement differences in Skill List
-                //        Not used for scripts I use, so I omit it for now.
-                return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $this->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
-                break;
-            }
             case "getbuttonpressed": {
                 return $this->createReadReference(TES5ReferenceFactory::MESSAGEBOX_VARIABLE_CONST, $globalScope, $multipleScriptsScope, $localScope);
                 break;
@@ -2054,6 +2131,15 @@ class TES5ValueFactory
                         return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
                     }
 
+                    case 'mercantile': {
+                        $functionName = "ModActorValue";
+                        $convertedArguments->add(new TES5String("Speechcraft"));
+                        $secondArg = $functionArguments->getValue(1);
+                        $convertedArguments->add($this->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+					
+					
                     case 'mysticism': { //It doesn't exist in Skyrim - defaulting to Illusion..
                         $functionName = "ModActorValue";
                         $convertedArguments->add(new TES5String("Illusion"));
@@ -2562,6 +2648,14 @@ class TES5ValueFactory
                     case 'security': {
                         $functionName = "SetActorValue";
                         $convertedArguments->add(new TES5String("Lockpicking"));
+                        $secondArg = $functionArguments->getValue(1);
+                        $convertedArguments->add($this->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
+                        return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
+                    }
+
+                    case 'mercantile': { //It doesn't exist in Skyrim - defaulting to Illusion..
+                        $functionName = "SetActorValue";
+                        $convertedArguments->add(new TES5String("Speechcraft"));
                         $secondArg = $functionArguments->getValue(1);
                         $convertedArguments->add($this->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
                         return $this->createObjectCall($calledOn, $functionName,$multipleScriptsScope, $convertedArguments);
