@@ -14,6 +14,7 @@ use Ormin\OBSLexicalParser\Builds\QF\Factory\QFFragmentFactory;
 use Ormin\OBSLexicalParser\Builds\QF\Factory\Service\MappedTargetsLogService;
 use Ormin\OBSLexicalParser\Builds\Service\FragmentsParsingService;
 use Ormin\OBSLexicalParser\Builds\Service\StandaloneParsingService;
+use Ormin\OBSLexicalParser\DI\TES5ValueFactoryFunctionFiller;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
 use Ormin\OBSLexicalParser\TES4\Parser\SyntaxErrorCleanParser;
 use Ormin\OBSLexicalParser\TES5\Context\TypeMapper;
@@ -22,6 +23,8 @@ use Ormin\OBSLexicalParser\TES5\Factory\TES5CodeScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ExpressionFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5FragmentFunctionScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5LocalScopeFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallArgumentsFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectPropertyFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5PrimitiveValueFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ReferenceFactory;
@@ -117,12 +120,16 @@ class BuildTargetFactory
                 $codeScopeFactory = new TES5CodeScopeFactory();
                 $expressionFactory = new TES5ExpressionFactory();
                 $typeInferencer = new TES5TypeInferencer($analyzer,'./BuildTargets/Standalone/Source/');
+                $objectCallFactory = new TES5ObjectCallFactory($typeInferencer);
                 $objectPropertyFactory = new TES5ObjectPropertyFactory($typeInferencer);
-                $referenceFactory = new TES5ReferenceFactory($objectPropertyFactory);
+                $referenceFactory = new TES5ReferenceFactory($objectCallFactory, $objectPropertyFactory);
                 $assignationFactory = new TES5VariableAssignationFactory($referenceFactory);
 
                 $localScopeFactory = new TES5LocalScopeFactory();
-                $valueFactory = new TES5ValueFactory($referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService);
+                $valueFactory = new TES5ValueFactory($objectCallFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService);
+                $filler = new TES5ValueFactoryFunctionFiller();
+                $objectCallArgumentsFactory = new TES5ObjectCallArgumentsFactory($valueFactory);
+                $filler->fillFunctions($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService);
                 $branchFactory = new TES5BranchFactory(
                     $localScopeFactory,
                     $codeScopeFactory,

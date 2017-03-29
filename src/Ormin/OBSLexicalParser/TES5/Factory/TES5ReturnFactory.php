@@ -19,7 +19,7 @@ use Ormin\OBSLexicalParser\TES5\Converter\TES5AdditionalBlockChangesPass;
 class TES5ReturnFactory  {
 
     /**
-     * @var TES5ValueFactory
+     * @var TES5ObjectCallArguments
      */
     private $objectCallFactory;
 
@@ -33,7 +33,7 @@ class TES5ReturnFactory  {
      */
     private $localScopeFactory;
 
-    public function __construct(TES5ValueFactory $objectCallFactory,
+    public function __construct(TES5ObjectCallFactory $objectCallFactory,
                                 TES5ReferenceFactory $referenceFactory,
                                 TES5BlockFunctionScopeFactory $localScopeFactory) {
         $this->objectCallFactory = $objectCallFactory;

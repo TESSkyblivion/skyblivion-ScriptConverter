@@ -15,6 +15,7 @@ use Ormin\OBSLexicalParser\TES5\AST\TES5Script;
 use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5BlockFactory;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5PropertiesFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ReferenceFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5StaticGlobalScopesFactory;
@@ -36,39 +37,21 @@ class TES4ToTES5ASTConverter
     private $blockFactory;
 
     /**
-     * @var \Ormin\OBSLexicalParser\TES5\Factory\TES5ValueFactory
+     * @var \Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallFactory
      */
-    private $valueFactory;
+    private $objectCallFactory;
 
     /**
      * @var \Ormin\OBSLexicalParser\TES5\Factory\TES5ReferenceFactory
      */
     private $referenceFactory;
 
-    /**
-     * @var \Ormin\OBSLexicalParser\TES5\Factory\TES5PropertiesFactory
-     */
-    private $propertiesFactory;
-
-    /**
-     * @var TES5StaticGlobalScopesFactory
-     */
-    private $staticGlobalScopesFactory;
-
-    /**
-     * @var TES5NameTransformer
-     */
-    private $nameTransformer;
-
-    public function __construct(ESMAnalyzer $ESMAnalyzer, TES5BlockFactory $blockFactory, TES5ValueFactory $valueFactory, TES5ReferenceFactory $referenceFactory, TES5PropertiesFactory $propertiesFactory, TES5StaticGlobalScopesFactory $staticGlobalScopesFactory, TES5NameTransformer $nameTransformer)
+    public function __construct(ESMAnalyzer $ESMAnalyzer, TES5BlockFactory $blockFactory, TES5ObjectCallFactory $objectCallFactory, TES5ReferenceFactory $referenceFactory)
     {
         $this->esmAnalyzer = $ESMAnalyzer;
         $this->blockFactory = $blockFactory;
-        $this->valueFactory = $valueFactory;
+        $this->objectCallFactory = $objectCallFactory;
         $this->referenceFactory = $referenceFactory;
-        $this->propertiesFactory = $propertiesFactory;
-        $this->staticGlobalScopesFactory = $staticGlobalScopesFactory;
-        $this->nameTransformer = $nameTransformer;
     }
 
     /**
@@ -149,7 +132,7 @@ class TES4ToTES5ASTConverter
                 foreach ($functions as $function) {
                     $blockList->add($function);
 
-                    $functionCall = $this->valueFactory->createObjectCall(
+                    $functionCall = $this->objectCallFactory->createObjectCall(
                         $this->referenceFactory->createReferenceToSelf($globalScope), $function->getFunctionName(), $multipleScriptsScope, $localScopeArguments, false // hacky.
                     );
 
