@@ -118,16 +118,16 @@ class BuildTargetCommand extends Command
                 $buildTarget->write($buildTracker);
             }
 
-            /*
+
             $output->writeln("Preparing build workspace...");
-            */
+
 
             /*
              *
              * @TODO - Create a factory that will provide a PrepareWorkspaceJob based on running system, so we can provide a
              * native implementation for Windows
              */
-            /*
+
             $prepareCommand = new PrepareWorkspaceJob($buildTargets);
             $prepareCommand->run();
 
@@ -137,7 +137,7 @@ class BuildTargetCommand extends Command
             $task->run();
 
             $output->writeln("Build completed.");
-            */
+
         } catch (\LogicException $e) {
             $output->writeln($e->getMessage());
             return;
