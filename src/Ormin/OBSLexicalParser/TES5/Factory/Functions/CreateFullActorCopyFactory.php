@@ -104,8 +104,6 @@ class CreateFullActorCopyFactory implements FunctionFactory
 
     public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
-        $localScope = $codeScope->getLocalScope();
-        $functionName = $function->getFunctionCall()->getFunctionName();
         $functionArguments = $function->getArguments();
         //We move the called upon to function arg ( cloned object ) and we replace placed upon to player
         $newToken = new TES4ApiToken($calledOn->getName());

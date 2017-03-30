@@ -103,9 +103,6 @@ class GetDispositionFactory implements FunctionFactory
 
     public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
-        $localScope = $codeScope->getLocalScope();
-        $functionName = $function->getFunctionCall()->getFunctionName();
-        $functionArguments = $function->getArguments();
         $arguments = new TES5ObjectCallArguments();
         $arguments->add(new TES5String("Variable01"));
         return $this->objectCallFactory->createObjectCall($calledOn, "GetActorValue", $multipleScriptsScope, $arguments);

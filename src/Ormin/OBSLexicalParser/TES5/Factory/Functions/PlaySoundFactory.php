@@ -96,6 +96,7 @@ class PlaySoundFactory implements FunctionFactory
 
     public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
+        $localScope = $codeScope->getLocalScope();
         $functionArguments = $function->getArguments();
         $calledOn = $this->referenceFactory->createReadReference($functionArguments->popValue(0)->getData(), $globalScope, $multipleScriptsScope, $localScope);
         $functionName = "play";

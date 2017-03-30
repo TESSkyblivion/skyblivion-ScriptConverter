@@ -99,7 +99,6 @@ class AddScriptPackageFactory implements FunctionFactory
     {
 
         $localScope = $codeScope->getLocalScope();
-        $functionName = $function->getFunctionCall()->getFunctionName();
         $functionArguments = $function->getArguments();
         $md5 = 'TES4SCENE_' . substr(md5($calledOn->getName() . $functionArguments->getValue(0)->getData()), 0, 16);
 

@@ -100,7 +100,6 @@ class LockFactory implements FunctionFactory
     {
         $functionArguments = $function->getArguments();
         $functionName = $function->getFunctionCall()->getFunctionName();
-        $localScope = $codeScope->getLocalScope();
 
         $methodArguments = new TES5ObjectCallArguments();
         $methodArguments->add(new TES5Bool(true)); //override different behaviour

@@ -103,7 +103,6 @@ class GetDetectedFactory implements FunctionFactory
     public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
         $localScope = $codeScope->getLocalScope();
-        $functionName = $function->getFunctionCall()->getFunctionName();
         $functionArguments = $function->getArguments();
         $value = $functionArguments->getValue(0);
         $functionArguments->setValue(0, new TES4ApiToken($calledOn->getName()));

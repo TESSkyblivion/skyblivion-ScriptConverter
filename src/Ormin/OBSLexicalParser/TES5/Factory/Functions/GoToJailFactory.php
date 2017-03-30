@@ -96,7 +96,6 @@ class GoToJailFactory implements FunctionFactory
 
     public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
-        $functionArguments = $function->getArguments();
         $localScope = $codeScope->getLocalScope();
         $calledOn = $this->referenceFactory->createReadReference("TES4CyrodiilCrimeFaction", $globalScope, $multipleScriptsScope, $localScope);
 

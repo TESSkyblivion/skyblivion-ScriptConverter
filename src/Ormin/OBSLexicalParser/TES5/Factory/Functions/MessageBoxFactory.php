@@ -102,6 +102,7 @@ class MessageBoxFactory implements FunctionFactory
 
     public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
+        $localScope = $codeScope->getLocalScope();
         $functionArguments = $function->getArguments();
 
         //todo Refactor - add floating point vars .
