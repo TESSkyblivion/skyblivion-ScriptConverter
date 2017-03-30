@@ -102,7 +102,7 @@ class GetPCInfamyFactory implements FunctionFactory
     public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
         $localScope = $codeScope->getLocalScope();
-        return $this->referenceFactory->createReadReference("Fame", $globalScope, $multipleScriptsScope, $localScope);
+        return $this->referenceFactory->createReadReference("Infamy", $globalScope, $multipleScriptsScope, $localScope);
 
     }
 }

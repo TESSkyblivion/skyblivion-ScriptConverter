@@ -287,7 +287,7 @@ class TES5ValueFactoryFunctionFiller
         $valueFactory->addFunctionFactory("playsound3d", new PlaySound3DFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("playsound", new PlaySoundFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("purgecellbuffers", new FillerFactory());
-        $valueFactory->addFunctionFactory("pushactoraway", new FillerFactory());
+        $valueFactory->addFunctionFactory("pushactoraway", new DefaultFunctionFactory($objectCallFactory, $objectCallArgumentsFactory));
         $valueFactory->addFunctionFactory("refreshtopiclist", new FillerFactory());
         $valueFactory->addFunctionFactory("releaseweatheroverride", new ReleaseWeatherOverrideFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("removeallitems", new DefaultFunctionFactory($objectCallFactory, $objectCallArgumentsFactory));
