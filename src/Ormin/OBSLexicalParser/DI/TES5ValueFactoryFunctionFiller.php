@@ -374,7 +374,7 @@ class TES5ValueFactoryFunctionFiller
         $valueFactory->addFunctionFactory("wait", new FillerFactory());
         $valueFactory->addFunctionFactory("wakeuppc", new NotSupportedFactory());
         $valueFactory->addFunctionFactory("yield", new DefaultFunctionFactory($objectCallFactory, $objectCallArgumentsFactory));
-        $valueFactory->addFunctionFactory("evp", new DefaultFunctionFactory($objectCallFactory, $objectCallArgumentsFactory));
+        $valueFactory->addFunctionFactory("evp", new RenamedFunctionFactory("EvaluatePackage", $objectCallFactory, $objectCallArgumentsFactory));
         $valueFactory->addFunctionFactory("forceav", new ForceActorValueFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("fw", new ForceWeatherFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("getav", new GetActorValueFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
