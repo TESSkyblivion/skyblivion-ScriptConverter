@@ -117,13 +117,17 @@ class BuildTargetCommand extends Command
             foreach($buildTargets->getIterator() as $buildTarget) {
                 $buildTarget->write($buildTracker);
             }
+
+            /*
             $output->writeln("Preparing build workspace...");
+            */
 
             /*
              *
              * @TODO - Create a factory that will provide a PrepareWorkspaceJob based on running system, so we can provide a
              * native implementation for Windows
              */
+            /*
             $prepareCommand = new PrepareWorkspaceJob($buildTargets);
             $prepareCommand->run();
 
@@ -132,19 +136,8 @@ class BuildTargetCommand extends Command
             $task = new CompileScriptJob($buildTargets, $build->getCompileLogPath());
             $task->run();
 
-            $output->writeln("Build completed, archiving ...");
-
-
-            /*
-             *
-             * @TODO - Create a factory that will provide a PrepareWorkspaceJob based on running system, so we can provide a
-             * native implementation for Windows
-             */
-            //$prepareCommand = new ArchiveBuildJob($buildTarget->getTargetName());
-            //$prepareCommand->run();
-
-
-
+            $output->writeln("Build completed.");
+            */
         } catch (\LogicException $e) {
             $output->writeln($e->getMessage());
             return;
