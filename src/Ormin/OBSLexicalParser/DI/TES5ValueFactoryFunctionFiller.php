@@ -1,6 +1,7 @@
 <?php
 namespace Ormin\OBSLexicalParser\DI;
 
+use Ormin\OBSLexicalParser\TES5\Factory\Functions\IsPCAMurdererFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ValueFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallArgumentsFactory;
@@ -251,7 +252,7 @@ class TES5ValueFactoryFunctionFiller
         $valueFactory->addFunctionFactory("isindangerouswater", new ReturnFalseFactory());
         $valueFactory->addFunctionFactory("isininterior", new DefaultFunctionFactory($objectCallFactory, $objectCallArgumentsFactory));
         $valueFactory->addFunctionFactory("isowner", new IsOwnerFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
-        $valueFactory->addFunctionFactory("ispcamurderer", new DefaultFunctionFactory($objectCallFactory, $objectCallArgumentsFactory));
+        $valueFactory->addFunctionFactory("ispcamurderer", new IsPCAMurdererFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("ispcsleeping", new IsPCSleepingFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("isplayerinjail", new IsPlayerInJailFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("israining", new IsRainingFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));

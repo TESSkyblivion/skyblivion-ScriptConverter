@@ -39,11 +39,17 @@ class TES5BlockFactory
      */
     private $localScopeFactory;
 
+    /**
+     * @var TES5InitialBlockCodeFactory
+     */
+    private $initialBlockCodeFactory;
+
     public function __construct(TES5ChainedCodeChunkFactory $chainedCodeChunkFactory,
                                 TES5BlockFunctionScopeFactory $blockFunctionScopeFactory,
                                 TES5CodeScopeFactory $codeScopeFactory,
                                 TES5AdditionalBlockChangesPass $changesPass,
-                                TES5LocalScopeFactory $localScopeFactory)
+                                TES5LocalScopeFactory $localScopeFactory,
+                                TES5InitialBlockCodeFactory $initialBlockCodeFactory)
     {
 
         $this->codeChunkFactory = $chainedCodeChunkFactory;
@@ -51,6 +57,7 @@ class TES5BlockFactory
         $this->codeScopeFactory = $codeScopeFactory;
         $this->changesPass = $changesPass;
         $this->localScopeFactory = $localScopeFactory;
+        $this->initialBlockCodeFactory = $initialBlockCodeFactory;
     }
 
     private function mapBlockType($blockType)
@@ -232,6 +239,9 @@ class TES5BlockFactory
         $blockFunctionScope = $this->blockFunctionScopeFactory->createFromBlockType($newBlockType);
 
         $newBlock = $this->createNewBlock($newBlockType, $blockFunctionScope);
+
+        $this->initialBlockCodeFactory->addInitialCode($multipleScriptsScope, $globalScope, $newBlock);
+
 
         if ($block->getChunks() !== null) {
 

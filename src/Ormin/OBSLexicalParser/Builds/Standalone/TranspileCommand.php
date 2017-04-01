@@ -21,6 +21,7 @@ use Ormin\OBSLexicalParser\TES5\Factory\TES5BranchFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ChainedCodeChunkFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5CodeScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ExpressionFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5InitialBlockCodeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5LocalScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5LocalVariableListFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallArgumentsFactory;
@@ -94,7 +95,8 @@ class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileComman
                 $blockLocalScopeFactory,
                 $codeScopeFactory,
                 new TES5AdditionalBlockChangesPass($objectCallFactory, $blockLocalScopeFactory, $codeScopeFactory, $expressionFactory, $referenceFactory, $branchFactory, $assignationFactory, $localScopeFactory),
-                $localScopeFactory
+                $localScopeFactory,
+                new TES5InitialBlockCodeFactory($branchFactory, $expressionFactory, $referenceFactory, $objectCallFactory)
             ),
             $objectCallFactory,
             $referenceFactory
