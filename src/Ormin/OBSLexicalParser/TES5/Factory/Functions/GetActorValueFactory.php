@@ -152,6 +152,11 @@ class GetActorValueFactory implements FunctionFactory
                 return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
             }
 
+            case 'acrobatics': {
+                $convertedArguments->add(new TES5String("Sneak"));
+                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
+            }
+
             case 'mercantile': {
                 $convertedArguments->add(new TES5String("Speechcraft"));
                 return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);

@@ -165,7 +165,16 @@ class SetActorValueFactory implements FunctionFactory
                 return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
             }
 
-            case 'mercantile': { //It doesn't exist in Skyrim - defaulting to Illusion..
+            case 'acrobatics': {
+                $functionName = "SetActorValue";
+                $convertedArguments->add(new TES5String("Sneak"));
+                $secondArg = $functionArguments->getValue(1);
+                $convertedArguments->add($this->valueFactory->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
+                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
+            }
+
+
+            case 'mercantile': {
                 $functionName = "SetActorValue";
                 $convertedArguments->add(new TES5String("Speechcraft"));
                 $secondArg = $functionArguments->getValue(1);

@@ -3,6 +3,7 @@
 namespace Ormin\OBSLexicalParser\TES5\Factory;
 
 use Ormin\OBSLexicalParser\TES5\AST\Block\TES5EventCodeBlock;
+use Ormin\OBSLexicalParser\TES5\AST\Code\TES5CodeScope;
 use Ormin\OBSLexicalParser\TES5\AST\Code\TES5Return;
 use Ormin\OBSLexicalParser\TES5\AST\Expression\Operators\TES5ArithmeticExpressionOperator;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
@@ -46,6 +47,15 @@ class TES5InitialBlockCodeFactory
         $this->objectCallFactory = $objectCallFactory;
     }
 
+    /**
+     * Add initial code to the blocks and return the scope in which conversion should occur
+     * Sometimes, we want to add a bit of code before the converted code, or want to encapsulate whole converted code
+     * with a branch or so - this is a place to do it.
+     * @param TES5MultipleScriptsScope $multipleScriptsScope
+     * @param TES5GlobalScope $globalScope
+     * @param TES5EventCodeBlock $eventCodeBlock
+     * @return TES5CodeScope Scope in which we want for conversion to happen
+     */
     public function addInitialCode(TES5MultipleScriptsScope $multipleScriptsScope, TES5GlobalScope $globalScope, TES5EventCodeBlock $eventCodeBlock)
     {
         switch($eventCodeBlock->getBlockType())
@@ -64,7 +74,27 @@ class TES5InitialBlockCodeFactory
                     );
                     $branch->getMainBranch()->getCodeScope()->add(new TES5Return());
                     $eventCodeBlock->addChunk($branch);
+                    return $eventCodeBlock->getCodeScope();
+                }  elseif($globalScope->getScriptHeader()->getBasicScriptType() == TES5BasicType::T_OBJECTREFERENCE()) {
+                    $branch = $this->branchFactory->createSimpleBranch(
+                        $this->expressionFactory->createArithmeticExpression(
+                            $this->objectCallFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope),"GetParentCell",$multipleScriptsScope, new TES5ObjectCallArguments()),
+                            TES5ArithmeticExpressionOperator::OPERATOR_EQUAL(),
+                            $this->objectCallFactory->createObjectCall($this->referenceFactory->createReferenceToPlayer(),"GetParentCell",$multipleScriptsScope, new TES5ObjectCallArguments())
+                        ),
+                        $eventCodeBlock->getCodeScope()->getLocalScope()
+                    );
+
+                    $eventCodeBlock->addChunk($branch);
+                    return $branch->getMainBranch()->getCodeScope();
+                } else {
+                    return $eventCodeBlock->getCodeScope();
                 }
+            }
+
+            default:
+            {
+                return $eventCodeBlock->getCodeScope();
             }
         }
     }

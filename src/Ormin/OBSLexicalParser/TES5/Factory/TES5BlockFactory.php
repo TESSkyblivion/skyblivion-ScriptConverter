@@ -240,9 +240,7 @@ class TES5BlockFactory
 
         $newBlock = $this->createNewBlock($newBlockType, $blockFunctionScope);
 
-        $this->initialBlockCodeFactory->addInitialCode($multipleScriptsScope, $globalScope, $newBlock);
-
-
+        $conversionScope = $this->initialBlockCodeFactory->addInitialCode($multipleScriptsScope, $globalScope, $newBlock);
         if ($block->getChunks() !== null) {
 
             foreach ($block->getChunks()->getCodeChunks() as $codeChunk) {
@@ -252,7 +250,7 @@ class TES5BlockFactory
                 if ($codeChunks !== null) {
 
                     foreach ($codeChunks as $newCodeChunk) {
-                        $newBlock->addChunk($newCodeChunk);
+                        $conversionScope->add($newCodeChunk);
                     }
 
                 }
