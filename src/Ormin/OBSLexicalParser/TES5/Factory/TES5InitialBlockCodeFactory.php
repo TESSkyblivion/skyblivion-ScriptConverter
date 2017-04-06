@@ -10,6 +10,8 @@ use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Bool;
+use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Float;
+use Ormin\OBSLexicalParser\TES5\Converter\TES5AdditionalBlockChangesPass;
 use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
 
 class TES5InitialBlockCodeFactory
@@ -71,6 +73,12 @@ class TES5InitialBlockCodeFactory
                             new TES5Bool(false)
                         ),
                         $eventCodeBlock->getCodeScope()->getLocalScope()
+                    );
+                    //Even though we'd like this script to not do anything at this time, it seems like sometimes condition races, so we're putting it into a loop anyways but with early return bailout
+                    $args = new TES5ObjectCallArguments();
+                    $args->add(new TES5Float(TES5AdditionalBlockChangesPass::ON_UPDATE_TICK));
+                    $eventCodeBlock->addChunk(
+                        $this->objectCallFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "RegisterForSingleUpdate", $multipleScriptsScope, $args)
                     );
                     $branch->getMainBranch()->getCodeScope()->add(new TES5Return());
                     $eventCodeBlock->addChunk($branch);
