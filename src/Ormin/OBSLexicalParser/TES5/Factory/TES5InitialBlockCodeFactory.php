@@ -77,7 +77,7 @@ class TES5InitialBlockCodeFactory
                     //Even though we'd like this script to not do anything at this time, it seems like sometimes condition races, so we're putting it into a loop anyways but with early return bailout
                     $args = new TES5ObjectCallArguments();
                     $args->add(new TES5Float(TES5AdditionalBlockChangesPass::ON_UPDATE_TICK));
-                    $eventCodeBlock->addChunk(
+                    $branch->getMainBranch()->getCodeScope()->add(
                         $this->objectCallFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "RegisterForSingleUpdate", $multipleScriptsScope, $args)
                     );
                     $branch->getMainBranch()->getCodeScope()->add(new TES5Return());
