@@ -5,6 +5,7 @@
         "phpunit/phpunit": "*"
     },
     "license": "BSD",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Ormin",
@@ -19,10 +20,17 @@
         "eddturtle/php-async-calls": "*",
         "camspiers/pthreads-pool": "^0.2.0",
         "dariuszp/cli-progress-bar": "^1.0",
-        "amphp/amp": "^1.2"
+        "amphp/amp": "^1.2",
+        "tesskyblivion/esreader": "dev-master"
     },
     "autoload": {
         "psr-0": {"": "src/"},
         "classmap": ["vendor/eddturtle/php-async-calls/lib/"]
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/TESSkyblivion/esreader"
+        }
+    ]
 }
