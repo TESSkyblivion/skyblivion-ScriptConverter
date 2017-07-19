@@ -70,7 +70,7 @@ class ESMAnalyzer
         }
 
         if ($this->scriptTypes === null) {
-
+            $this->scriptTypes = [];
             $scpts = self::$esm->getGrup('SCPT');
 
             /**
