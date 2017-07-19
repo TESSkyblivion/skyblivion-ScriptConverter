@@ -35,7 +35,7 @@ class BuildTargetCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         set_time_limit(10800); // 3 hours is the maximum for this command. Need more? You really screwed something, full suite for all Oblivion vanilla data takes 20 minutes. :)
-
+        ini_set("memory_limit", "4096M");
         try {
 
             $targets = $input->getArgument('targets');
