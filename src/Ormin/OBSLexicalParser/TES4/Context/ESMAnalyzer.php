@@ -50,6 +50,11 @@ class ESMAnalyzer
     private static $esm;
 
     /**
+     * @var ESMAnalyzer
+     */
+    private static $instance;
+
+    /**
      * @param TypeMapper $typeMapper
      * @param string $dataFile
      */
