@@ -95,7 +95,7 @@ class ESMAnalyzer
                     $scriptType = TES5BasicType::T_OBJECTREFERENCE();
                 }
 
-                $this->scriptTypes[trim($edid)] = $scriptType;
+                $this->scriptTypes[strtolower(trim($edid))] = $scriptType;
 
             }
 
