@@ -10,6 +10,7 @@ use Ormin\OBSLexicalParser\Commands\Dispatch\CompileScriptJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\PrepareWorkspaceJob;
 use Ormin\OBSLexicalParser\Commands\Dispatch\TranspileChunkJob;
 use Ormin\OBSLexicalParser\Commands\Progress\ProgressInformer;
+use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -118,6 +119,8 @@ class BuildTargetCommand extends Command
                 $buildTarget->write($buildTracker);
             }
 
+            //Hack - force ESM analyzer deallocation.
+            ESMAnalyzer::deallocate();
 
             $output->writeln("Preparing build workspace...");
 

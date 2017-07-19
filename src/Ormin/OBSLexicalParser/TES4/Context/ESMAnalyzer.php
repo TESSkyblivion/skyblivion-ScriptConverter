@@ -243,4 +243,16 @@ class ESMAnalyzer
 
     }
 
+    /**
+     * Makes the adapter unusable by deallocating the esm object.
+     * This really ought to be more clean, but until this class is used statically we have no other choice
+     */
+    public static function deallocate()
+    {
+        //Drop the ref
+        self::$esm = null;
+        //Force the GC
+        gc_collect_cycles();
+    }
+
 }
