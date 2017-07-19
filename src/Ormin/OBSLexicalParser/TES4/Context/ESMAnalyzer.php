@@ -214,7 +214,7 @@ class ESMAnalyzer
 
                 if($attachedNameRecordType == "REFR" ||
                    $attachedNameRecordType == "ACRE" ||
-                   $attachedNameRecordType == "CREA")
+                   $attachedNameRecordType == "ACHR")
                 {
                     //Resolve the reference
                     $baseFormid = $attachedNameRecord->getSubrecordAsFormid('NAME');
