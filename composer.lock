@@ -430,12 +430,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/TESSkyblivion/esreader.git",
-                "reference": "f6817fafccf71f5d3c523980c10cfc1d8b0e4722"
+                "reference": "37d2c3b3f798f1d2dae502ba6f701ab7425cd6fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TESSkyblivion/esreader/zipball/f6817fafccf71f5d3c523980c10cfc1d8b0e4722",
-                "reference": "f6817fafccf71f5d3c523980c10cfc1d8b0e4722",
+                "url": "https://api.github.com/repos/TESSkyblivion/esreader/zipball/37d2c3b3f798f1d2dae502ba6f701ab7425cd6fd",
+                "reference": "37d2c3b3f798f1d2dae502ba6f701ab7425cd6fd",
                 "shasum": ""
             },
             "require": {
@@ -462,7 +462,7 @@
                 "source": "https://github.com/TESSkyblivion/esreader/tree/master",
                 "issues": "https://github.com/TESSkyblivion/esreader/issues"
             },
-            "time": "2017-07-20 23:03:38"
+            "time": "2017-07-20 23:14:27"
         }
     ],
     "packages-dev": [
