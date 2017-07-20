@@ -255,7 +255,7 @@ class ESMAnalyzer
 
         if ($this->scriptTypes === null) {
             $this->scriptTypes = [];
-            $scpts = self::$esm->getGrup('SCPT');
+            $scpts = self::$esm->getGrup(TES4RecordType::SCPT());
 
             /**
              * @var TES4Record $scpt
@@ -287,7 +287,7 @@ class ESMAnalyzer
 
         if ($this->globals === null) {
 
-            $globals = self::$esm->getGrup('GLOB');
+            $globals = self::$esm->getGrup(TES4RecordType::GLOB());
             $globalArray = [];
 
             /**
