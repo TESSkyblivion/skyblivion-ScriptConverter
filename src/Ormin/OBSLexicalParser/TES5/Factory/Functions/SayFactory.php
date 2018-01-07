@@ -3,6 +3,7 @@
 namespace Ormin\OBSLexicalParser\TES5\Factory\Functions;
 
 use Ormin\OBSLexicalParser\TES4\AST\Value\FunctionCall\TES4Function;
+use Ormin\OBSLexicalParser\TES4\AST\Value\TES4ApiToken;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
 use Ormin\OBSLexicalParser\TES5\AST\Code\TES5CodeScope;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
@@ -104,17 +105,18 @@ class SayFactory implements FunctionFactory
         $arguments->add($calledOn);
         $arguments->add($this->valueFactory->createValue($functionArguments->getValue(0), $codeScope, $globalScope, $multipleScriptsScope));
 
-
-        /*
-         * Deprecated - causes problems.
         $optionalFlag = $functionArguments->getValue(2);
         if ($optionalFlag !== null) {
-            $arguments->add($this->valueFactory->createValue($functionArguments->getValue(2), $codeScope, $globalScope, $multipleScriptsScope));
+            if(ESMAnalyzer::instance()->getFormTypeByEDID($optionalFlag->getData()) !== "REFR") {
+                $this->metadataLogService->add('ADD_SPEAK_AS_ACTOR', [$optionalFlag->getData()]);
+                $optionalFlag = new TES4ApiToken($optionalFlag->getData()."Ref");
+            }
+
+            $arguments->add($this->valueFactory->createValue($optionalFlag, $codeScope, $globalScope, $multipleScriptsScope));
         } else {
             $arguments->add(new TES5None());
         }
-        */
-        $arguments->add(new TES5None());
+
         $arguments->add(new TES5Bool(true));
 
         $timerReference = $this->referenceFactory->createReadReference("tTimer", $globalScope, $multipleScriptsScope, $localScope);
