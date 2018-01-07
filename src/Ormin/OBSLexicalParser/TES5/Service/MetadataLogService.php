@@ -15,7 +15,7 @@ class MetadataLogService {
 
     public function __construct(Build $build) {
         $filename = $build->getBuildPath() . "Metadata";
-        $this->handle = fopen($filename,'w+');
+        $this->handle = fopen($filename,'a+');
     }
 
     public function add($command,$arguments = []) {
