@@ -60,6 +60,11 @@ class BuildTargetCommand extends Command
 
                 $errorLog = fopen($build->getErrorLogPath(), "w+");
 
+                // Create Metadata file if it doesn't exist and clear
+                $filename = $build->getBuildPath() . "Metadata";
+                $fileHandle = fopen($filename,'w+');
+                fclose($fileHandle);
+
                 $buildPlan = $buildTargets->getBuildPlan($this->threadsNumber);
 
                 $promises = [];
