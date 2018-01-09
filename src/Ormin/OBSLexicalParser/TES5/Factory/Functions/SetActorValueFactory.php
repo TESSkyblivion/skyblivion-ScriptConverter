@@ -103,6 +103,25 @@ class SetActorValueFactory implements FunctionFactory
         $functionArguments = $function->getArguments();
         $convertedArguments = new TES5ObjectCallArguments();
 
+        $actorValueMap = [
+            'fatigue' => 'Stamina',
+            'armorer' => 'Smithing',
+            'security' => 'Lockpicking',
+            'acrobatics' => 'Sneak',
+            'mercantile' => 'Speechcraft',
+            'mysticism' => 'Illusion',
+            'blade' => 'OneHanded',
+            'blunt' => 'OneHanded',
+            'encumbrance' => 'InventoryWeight',
+            'spellabsorbchance' => 'AbsorbChance',
+            'resistfire' => 'FireResist',
+            'resistfrost' => 'FrostResist',
+            'resistdisease' => 'DiseaseResist',
+            'resistmagic' => 'MagicResist',
+            'resistpoison' => 'PoisonResist',
+            'resistshock' => 'ElectricResist'
+        ];
+
         $firstArg = $functionArguments->getValue(0);
 
         switch (strtolower($firstArg->getData())) {
@@ -140,61 +159,24 @@ class SetActorValueFactory implements FunctionFactory
                 return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
             }
 
-            case 'fatigue': {
-                $functionName = "SetActorValue";
-                $convertedArguments->add(new TES5String('Stamina'));
-                $secondArg = $functionArguments->getValue(1);
-                $convertedArguments->add($this->valueFactory->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'armorer': {
-                $functionName = "SetActorValue";
-
-                $convertedArguments->add(new TES5String("Smithing"));
-                $secondArg = $functionArguments->getValue(1);
-                $convertedArguments->add($this->valueFactory->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'security': {
-                $functionName = "SetActorValue";
-                $convertedArguments->add(new TES5String("Lockpicking"));
-                $secondArg = $functionArguments->getValue(1);
-                $convertedArguments->add($this->valueFactory->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'acrobatics': {
-                $functionName = "SetActorValue";
-                $convertedArguments->add(new TES5String("Sneak"));
-                $secondArg = $functionArguments->getValue(1);
-                $convertedArguments->add($this->valueFactory->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-
-            case 'mercantile': {
-                $functionName = "SetActorValue";
-                $convertedArguments->add(new TES5String("Speechcraft"));
-                $secondArg = $functionArguments->getValue(1);
-                $convertedArguments->add($this->valueFactory->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'mysticism': { //It doesn't exist in Skyrim - defaulting to Illusion..
-                $functionName = "SetActorValue";
-                $convertedArguments->add(new TES5String("Illusion"));
-                $secondArg = $functionArguments->getValue(1);
-                $convertedArguments->add($this->valueFactory->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
+            case 'fatigue':
+            case 'armorer':
+            case 'security':
+            case 'acrobatics':
+            case 'mercantile':
+            case 'mysticism': //It doesn't exist in Skyrim - defaulting to Illusion..
             case 'blade':
-            case 'blunt': {
+            case 'blunt':
+            case 'encumbrance':
+            case 'spellabsorbchance':
+            case 'resistfire':
+            case 'resistfrost':
+            case 'resistdisease':
+            case 'resistmagic':
+            case 'resistpoison':
+            case 'resistshock': {
                 $functionName = "SetActorValue";
-
-                $convertedArguments->add(new TES5String("OneHanded"));
+                $convertedArguments->add(new TES5String($actorValueMap[strtolower($firstArg->getData())]));
                 $secondArg = $functionArguments->getValue(1);
                 $convertedArguments->add($this->valueFactory->createValue($secondArg, $codeScope, $globalScope, $multipleScriptsScope));
                 return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);

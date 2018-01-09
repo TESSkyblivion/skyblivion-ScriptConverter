@@ -109,6 +109,25 @@ class GetActorValueFactory implements FunctionFactory
         $functionArguments = $function->getArguments();
         //@TODO - This should be fixed on expression-parsing level, with agression and confidence checks adjusted accordingly. There are no retail uses, so im not doing this for now ;)
 
+        $actorValueMap = [
+            'fatigue' => 'Stamina',
+            'armorer' => 'Smithing',
+            'security' => 'Lockpicking',
+            'acrobatics' => 'Sneak',
+            'mercantile' => 'Speechcraft',
+            'mysticism' => 'Illusion',
+            'blade' => 'OneHanded',
+            'blunt' => 'OneHanded',
+            'encumbrance' => 'InventoryWeight',
+            'spellabsorbchance' => 'AbsorbChance',
+            'resistfire' => 'FireResist',
+            'resistfrost' => 'FrostResist',
+            'resistdisease' => 'DiseaseResist',
+            'resistmagic' => 'MagicResist',
+            'resistpoison' => 'PoisonResist',
+            'resistshock' => 'ElectricResist'
+        ];
+        
         $firstArg = $functionArguments->getValue(0);
         $convertedArguments = new TES5ObjectCallArguments();
         switch (strtolower($firstArg->getData())) {
@@ -137,40 +156,23 @@ class GetActorValueFactory implements FunctionFactory
 
             }
 
-            case 'fatigue': {
-                $convertedArguments->add(new TES5String('Stamina'));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'armorer': {
-                $convertedArguments->add(new TES5String("Smithing"));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'security': {
-                $convertedArguments->add(new TES5String("Lockpicking"));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'acrobatics': {
-                $convertedArguments->add(new TES5String("Sneak"));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'mercantile': {
-                $convertedArguments->add(new TES5String("Speechcraft"));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
-            case 'mysticism': { //It doesn't exist in Skyrim - defaulting to Illusion..
-
-                $convertedArguments->add(new TES5String("Illusion"));
-                return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
-            }
-
+            case 'fatigue':
+            case 'armorer':
+            case 'security':
+            case 'acrobatics':
+            case 'mercantile':
+            case 'mysticism': //It doesn't exist in Skyrim - defaulting to Illusion..
             case 'blade':
-            case 'blunt': {
-                $convertedArguments->add(new TES5String("OneHanded"));
+            case 'blunt':
+            case 'encumbrance':
+            case 'spellabsorbchance':
+            case 'resistfire':
+            case 'resistfrost':
+            case 'resistdisease':
+            case 'resistmagic':
+            case 'resistpoison':
+            case 'resistshock': {
+                $convertedArguments->add(new TES5String($actorValueMap[strtolower($firstArg->getData())]));
                 return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $convertedArguments);
             }
 
