@@ -106,7 +106,7 @@ class GetCrimeGoldFactory implements FunctionFactory
         $functionArguments = $function->getArguments();
 
         //This will sum the bounties from all the factions.
-        $calledOn = $this->referenceFactory->createReadReference("TES4CyrodiilCrimeFaction", $globalScope, $multipleScriptsScope, $localScope);
+        $calledOn = $this->referenceFactory->createReadReference("CyrodiilCrimeFaction", $globalScope, $multipleScriptsScope, $localScope);
         return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $this->objectCallArgumentsFactory->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
 
     }
