@@ -57,7 +57,7 @@ class TES5ReferenceFactory
             'tContainer' => TES5TypeFactory::memberByValue("TES4Container", TES5BasicType::T_QUEST()), //Data container
             'tTimer' => TES5TypeFactory::memberByValue("TES4TimerHelper", TES5BasicType::T_QUEST()), //Timer functions
             'tGSPLocalTimer' => TES5BasicType::T_FLOAT(), //used for get seconds passed logical conversion
-            'TES4CyrodiilCrimeFaction' => TES5BasicType::T_FACTION(), //global cyrodiil faction, WE HAVE BETTER CRIME SYSTEM IN CYRODIIL DAWG
+            'CyrodiilCrimeFaction' => TES5BasicType::T_FACTION(), //global cyrodiil faction, WE HAVE BETTER CRIME SYSTEM IN CYRODIIL DAWG
             self::MESSAGEBOX_VARIABLE_CONST => TES5BasicType::T_INT() // set by script instead of original messageBox
         ];
 

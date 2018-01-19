@@ -99,7 +99,7 @@ class PayFineFactory implements FunctionFactory
     {
         $localScope = $codeScope->getLocalScope();
         $player = $this->referenceFactory->createReferenceToPlayer();
-        $faction = $this->referenceFactory->createReadReference("TES4CyrodiilCrimeFaction", $globalScope, $multipleScriptsScope, $localScope);
+        $faction = $this->referenceFactory->createReadReference("CyrodiilCrimeFaction", $globalScope, $multipleScriptsScope, $localScope);
         $functionName = "PayCrimeGold";
         $argumentList = new TES5ObjectCallArguments();
         $argumentList->add(new TES5Integer(1));
