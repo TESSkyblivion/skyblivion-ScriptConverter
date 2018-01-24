@@ -105,7 +105,7 @@ class ModCrimeGoldFactory implements FunctionFactory
         $functionName = $function->getFunctionCall()->getFunctionName();
 
         $localScope = $codeScope->getLocalScope();
-        $calledOn = $this->referenceFactory->createReadReference("TES4CyrodiilCrimeFaction", $globalScope, $multipleScriptsScope, $localScope);
+        $calledOn = $this->referenceFactory->createReadReference("CyrodiilCrimeFaction", $globalScope, $multipleScriptsScope, $localScope);
         return $this->objectCallFactory->createObjectCall($calledOn, $functionName, $multipleScriptsScope, $this->objectCallArgumentsFactory->createArgumentList($functionArguments, $codeScope, $globalScope, $multipleScriptsScope));
 
 

@@ -5,11 +5,11 @@ namespace Ormin\OBSLexicalParser\TES5\Factory\Functions;
 use Ormin\OBSLexicalParser\TES4\AST\Value\FunctionCall\TES4Function;
 use Ormin\OBSLexicalParser\TES4\Context\ESMAnalyzer;
 use Ormin\OBSLexicalParser\TES5\AST\Code\TES5CodeScope;
+use Ormin\OBSLexicalParser\TES5\AST\Expression\Operators\TES5ArithmeticExpressionOperator;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5ObjectCallArguments;
 use Ormin\OBSLexicalParser\TES5\AST\Object\TES5Referencer;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
-use Ormin\OBSLexicalParser\TES5\AST\Value\Primitive\TES5Integer;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ExpressionFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallArgumentsFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallFactory;
@@ -21,8 +21,14 @@ use Ormin\OBSLexicalParser\TES5\Factory\TES5VariableAssignationFactory;
 use Ormin\OBSLexicalParser\TES5\Service\MetadataLogService;
 use Ormin\OBSLexicalParser\TES5\Service\TES5TypeInferencer;
 
-class PayFineFactory implements FunctionFactory
+class GetPlayerInSEWorldFactory implements FunctionFactory
 {
+
+    /**
+     * @var string
+     */
+
+
     /**
      * @var TES5ReferenceFactory
      */
@@ -98,16 +104,15 @@ class PayFineFactory implements FunctionFactory
     public function convertFunction(TES5Referencer $calledOn, TES4Function $function, TES5CodeScope $codeScope, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope)
     {
         $localScope = $codeScope->getLocalScope();
-        $player = $this->referenceFactory->createReferenceToPlayer();
-        $faction = $this->referenceFactory->createReadReference("CyrodiilCrimeFaction", $globalScope, $multipleScriptsScope, $localScope);
-        $functionName = "PayCrimeGold";
-        $argumentList = new TES5ObjectCallArguments();
-        $argumentList->add(new TES5Integer(1));
-        $argumentList->add(new TES5Integer(1));
-        $argumentList->add($faction);
+        $arguments = new TES5ObjectCallArguments();
 
-        return $this->objectCallFactory->createObjectCall($player, $functionName, $multipleScriptsScope, $argumentList);
+        $loc = $this->referenceFactory->createReadReference("SEWorldLocation", $globalScope, $multipleScriptsScope, $localScope);
+        $arguments->add($loc);
 
+        $exp = $this->objectCallFactory->createObjectCall(
+            $this->referenceFactory->createReferenceToPlayer(), "IsInLocation", $multipleScriptsScope, $arguments
+        );
 
+        return $exp;
     }
 }

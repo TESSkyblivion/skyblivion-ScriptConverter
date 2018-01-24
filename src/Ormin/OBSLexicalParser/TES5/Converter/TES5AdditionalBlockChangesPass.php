@@ -442,6 +442,37 @@ class TES5AdditionalBlockChangesPass {
         }
             */
 
+        case 'onequip':
+        case 'onunequip': {
+            if($block->getBlockParameterList() != null) {
+                $parameterList = $block->getBlockParameterList()->getVariableList();
+                $equipActor = $parameterList[0];
+                $localScope = $newBlock->getCodeScope()->getLocalScope();
+                $equipActorRef = $this->referenceFactory->createReference($equipActor->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
+
+                $expression = $this->expressionFactory->createArithmeticExpression(
+                    $this->referenceFactory->createReferenceToVariable($localScope->getVariableByName("akActor")),
+                    TES5ArithmeticExpressionOperator::OPERATOR_EQUAL(),
+                    $equipActorRef
+                );
+
+                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
+
+                $outerBranchCode = unserialize(serialize($newBlock->getCodeScope()));
+                $outerBranchCode->getLocalScope()->setParentScope($newCodeScope->getLocalScope());
+
+                $newCodeScope->add(new TES5Branch(
+                    new TES5SubBranch(
+                        $expression,
+                        $outerBranchCode
+                    )
+                ));
+                $newBlock->setCodeScope($newCodeScope);
+            }
+
+            break;
+        }
+
         }
 
     }

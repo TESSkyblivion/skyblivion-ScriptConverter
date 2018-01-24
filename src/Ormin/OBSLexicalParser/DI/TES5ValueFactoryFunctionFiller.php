@@ -64,6 +64,7 @@ use Ormin\OBSLexicalParser\TES5\Factory\Functions\GetPCFameFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\Functions\GetPCInfamyFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\Functions\GetPCIsRaceFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\Functions\GetPCIsSexFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\Functions\GetPlayerInSEWorldFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\Functions\GetPosFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\Functions\GetRandomPercentFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\Functions\GetSecondsPassedFactory;
@@ -224,6 +225,7 @@ class TES5ValueFactoryFunctionFiller
         $valueFactory->addFunctionFactory("getpcissex", new GetPCIsSexFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("getpcmiscstat", new NotSupportedFactory());
         $valueFactory->addFunctionFactory("getplayercontrolsdisabled", new ReturnFalseFactory());
+        $valueFactory->addFunctionFactory("getplayerinseworld", new GetPlayerInSEWorldFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("getpos", new GetPosFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
         $valueFactory->addFunctionFactory("getquestrunning", new PopCalledRenameFunctionFactory("IsRunning", $referenceFactory, $objectCallFactory, $objectCallArgumentsFactory));
         $valueFactory->addFunctionFactory("getrandompercent", new GetRandomPercentFactory($valueFactory, $objectCallFactory, $objectCallArgumentsFactory, $referenceFactory, $expressionFactory, $assignationFactory, $objectPropertyFactory, $analyzer, $primitiveValueFactory, $typeInferencer, $metadataLogService));
