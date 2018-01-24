@@ -5,6 +5,7 @@
  */
 
 namespace Ormin\OBSLexicalParser\Builds;
+use Ormin\OBSLexicalParser\TES5\AST\Property\Collection\TES5GlobalVariables;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
 use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
@@ -16,8 +17,19 @@ use Ormin\OBSLexicalParser\TES5\Service\TES5NameTransformer;
  */
 class BuildTarget
 {
+    const BUILD_TARGET_STANDALONE = "Standalone";
 
-    const DEFAULT_TARGETS = "Standalone,TIF";
+    const BUILD_TARGET_TIF = "TIF";
+
+    const BUILD_TARGET_QF = "QF";
+
+    const BUILD_TARGET_PF = "PF";
+
+    const DEFAULT_TARGETS = self::BUILD_TARGET_STANDALONE .
+                            "," .
+                            self::BUILD_TARGET_TIF .
+                            "," .
+                            self::BUILD_TARGET_QF;
 
     /**
      * @var string
@@ -55,6 +67,11 @@ class BuildTarget
     private $buildScopeCommand;
 
     /**
+     * @var WriteCommand
+     */
+    private $writeCommand;
+
+    /**
      * Needed for proper resolution of filename
      * @var TES5NameTransformer
      */
@@ -67,7 +84,8 @@ class BuildTarget
                                 TranspileCommand $transpileCommand,
                                 CompileCommand $compileCommand,
                                 ASTCommand $ASTCommand,
-                                BuildScopeCommand $buildScopeCommand)
+                                BuildScopeCommand $buildScopeCommand,
+                                WriteCommand $writeCommand)
     {
         $this->transpileInitialized = false;
         $this->compileInitialized = false;
@@ -81,6 +99,7 @@ class BuildTarget
         $this->nameTransformer = $nameTransformer;
         $this->ASTCommand = $ASTCommand;
         $this->buildScopeCommand = $buildScopeCommand;
+        $this->writeCommand = $writeCommand;
     }
 
 
@@ -95,7 +114,7 @@ class BuildTarget
     {
 
         if (!$this->transpileInitialized) {
-            $this->transpileCommand->initialize();
+            $this->transpileCommand->initialize($this->build);
             $this->transpileInitialized = true;
         }
 
@@ -124,14 +143,24 @@ class BuildTarget
         return $this->ASTCommand->getAST($sourcePath);
     }
 
-    public function buildScope($sourcePath)
+    /**
+     * @param string $sourcePath
+     * @param TES5GlobalVariables $globalVariables
+     * @return TES5GlobalScope
+     */
+    public function buildScope($sourcePath, TES5GlobalVariables $globalVariables)
     {
         if (!$this->scopeInitialized) {
             $this->buildScopeCommand->initialize();
             $this->scopeInitialized = true;
         }
 
-        return $this->buildScopeCommand->buildScope($sourcePath);
+        return $this->buildScopeCommand->buildScope($sourcePath, $globalVariables);
+    }
+
+    public function write(BuildTracker $buildTracker)
+    {
+        $this->writeCommand->write($this, $buildTracker);
     }
 
     /**

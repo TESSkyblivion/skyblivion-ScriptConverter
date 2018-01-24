@@ -25,10 +25,9 @@ class TES5GlobalScope implements TES5Outputtable {
     private $properties = [];
 
     /**
-     * @var TES5GlobalVariable[]
+     * TES5GlobalScope constructor.
+     * @param TES5ScriptHeader $scriptHeader
      */
-    private $globalVariables = [];
-
     public function __construct(TES5ScriptHeader $scriptHeader) {
         $this->scriptHeader = $scriptHeader;
     }
@@ -52,10 +51,6 @@ class TES5GlobalScope implements TES5Outputtable {
         return $codeLines;
     }
 
-    public function addGlobalVariable(TES5GlobalVariable $globalVariable) {
-        $this->globalVariables[] = $globalVariable;
-    }
-
     public function getPropertyByName($propertyName) {
         foreach($this->properties as $property) {
             if(strtolower($propertyName)."_p" == strtolower($property->getPropertyName())) {
@@ -67,19 +62,8 @@ class TES5GlobalScope implements TES5Outputtable {
         return null;
     }
 
-    public function getGlobalVariableByName($globalVariableName) {
-        foreach($this->globalVariables as $globalVariable) {
-            if(strtolower($globalVariableName) == strtolower($globalVariable->getName())) {
-                //Token found.
-                return $globalVariable;
-            }
-        }
-
-        return null;
-    }
-
-    public function hasGlobalVariable($globalVariableName) {
-        return $this->getGlobalVariableByName($globalVariableName) !== null;
+    public function getPropertiesList() {
+        return $this->properties;
     }
 
 } 

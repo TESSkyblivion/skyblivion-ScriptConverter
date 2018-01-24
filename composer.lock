@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3337b69f5d3103760b7c67cff088d879",
-    "content-hash": "9d39b7865375ef4fb22a05741ac6062d",
+    "content-hash": "e6711ceca783d27d4b396293ed7cb690",
     "packages": [
         {
             "name": "amphp/amp",
@@ -62,7 +61,7 @@
                 "non-blocking",
                 "promise"
             ],
-            "time": "2016-05-12 12:54:59"
+            "time": "2016-05-12T12:54:59+00:00"
         },
         {
             "name": "camspiers/pthreads-pool",
@@ -89,7 +88,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "description": "Pool implementation for pthreads",
-            "time": "2014-02-09 21:46:04"
+            "time": "2014-02-09T21:46:04+00:00"
         },
         {
             "name": "dariuszp/cli-progress-bar",
@@ -122,7 +121,7 @@
                 }
             ],
             "description": "Cli progress bar",
-            "time": "2015-11-02 14:38:59"
+            "time": "2015-11-02T14:38:59+00:00"
         },
         {
             "name": "doctrine/collections",
@@ -190,7 +189,7 @@
                 "collections",
                 "iterator"
             ],
-            "time": "2014-02-03 23:07:43"
+            "time": "2014-02-03T23:07:43+00:00"
         },
         {
             "name": "eddturtle/php-async-calls",
@@ -225,7 +224,7 @@
                 "calls",
                 "php"
             ],
-            "time": "2014-12-25 22:55:05"
+            "time": "2014-12-25T22:55:05+00:00"
         },
         {
             "name": "eloquent/enumeration",
@@ -274,7 +273,46 @@
                 "set",
                 "type"
             ],
-            "time": "2014-03-13 01:16:59"
+            "time": "2014-03-13T01:16:59+00:00"
+        },
+        {
+            "name": "farafiri/php-parsing-tool",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/farafiri/PHP-parsing-tool.git",
+                "reference": "cc26797d79af32b2b66e7f4e59e21e0c9b872a12"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/farafiri/PHP-parsing-tool/zipball/cc26797d79af32b2b66e7f4e59e21e0c9b872a12",
+                "reference": "cc26797d79af32b2b66e7f4e59e21e0c9b872a12",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ParserGenerator\\tests\\": "tests/",
+                    "ParserGenerator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "farafiri"
+                }
+            ],
+            "description": "library for parsing",
+            "time": "2017-02-11T15:43:24+00:00"
         },
         {
             "name": "jakubledl/dissect",
@@ -384,7 +422,47 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "http://symfony.com",
-            "time": "2014-10-05 13:57:04"
+            "time": "2014-10-05T13:57:04+00:00"
+        },
+        {
+            "name": "tesskyblivion/esreader",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TESSkyblivion/esreader.git",
+                "reference": "37d2c3b3f798f1d2dae502ba6f701ab7425cd6fd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TESSkyblivion/esreader/zipball/37d2c3b3f798f1d2dae502ba6f701ab7425cd6fd",
+                "reference": "37d2c3b3f798f1d2dae502ba6f701ab7425cd6fd",
+                "shasum": ""
+            },
+            "require": {
+                "eloquent/enumeration": "^5.1",
+                "farafiri/php-parsing-tool": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ormin",
+                    "email": "orminapod3@gmail.com"
+                }
+            ],
+            "description": "Allows for accessing .esm ( Elder Scrolls Master ) and .esp ( Elder Scrolls Plugin ) files.\"",
+            "support": {
+                "source": "https://github.com/TESSkyblivion/esreader/tree/master",
+                "issues": "https://github.com/TESSkyblivion/esreader/issues"
+            },
+            "time": "2017-07-20 23:14:27"
         }
     ],
     "packages-dev": [
@@ -434,7 +512,7 @@
                 "shortest path",
                 "vertex"
             ],
-            "time": "2014-03-12 22:54:24"
+            "time": "2014-03-12T22:54:24+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -488,7 +566,7 @@
                 "constructor",
                 "instantiate"
             ],
-            "time": "2015-06-14 21:17:01"
+            "time": "2015-06-14T21:17:01+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -533,7 +611,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2014-10-14 19:40:07"
+            "time": "2014-10-14T19:40:07+00:00"
         },
         {
             "name": "phpdocumentor/reflection-docblock",
@@ -582,7 +660,7 @@
                     "email": "mike.vanriel@naenius.com"
                 }
             ],
-            "time": "2014-08-09 10:27:07"
+            "time": "2014-08-09T10:27:07+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -644,7 +722,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2015-10-06 15:47:00"
+            "time": "2015-10-06T15:47:00+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -689,7 +767,7 @@
                 "filesystem",
                 "iterator"
             ],
-            "time": "2013-10-10 15:34:57"
+            "time": "2013-10-10T15:34:57+00:00"
         },
         {
             "name": "phpunit/php-text-template",
@@ -730,7 +808,7 @@
             "keywords": [
                 "template"
             ],
-            "time": "2015-06-21 13:50:34"
+            "time": "2015-06-21T13:50:34+00:00"
         },
         {
             "name": "phpunit/php-timer",
@@ -771,7 +849,7 @@
             "keywords": [
                 "timer"
             ],
-            "time": "2015-06-21 08:01:12"
+            "time": "2015-06-21T08:01:12+00:00"
         },
         {
             "name": "phpunit/php-token-stream",
@@ -820,7 +898,7 @@
             "keywords": [
                 "tokenizer"
             ],
-            "time": "2015-09-15 10:49:45"
+            "time": "2015-09-15T10:49:45+00:00"
         },
         {
             "name": "phpunit/phpunit",
@@ -894,7 +972,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2014-10-22 11:43:12"
+            "time": "2014-10-22T11:43:12+00:00"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -950,7 +1028,7 @@
                 "mock",
                 "xunit"
             ],
-            "time": "2015-10-02 06:51:40"
+            "time": "2015-10-02T06:51:40+00:00"
         },
         {
             "name": "sebastian/comparator",
@@ -1014,7 +1092,7 @@
                 "compare",
                 "equality"
             ],
-            "time": "2015-07-26 15:48:44"
+            "time": "2015-07-26T15:48:44+00:00"
         },
         {
             "name": "sebastian/diff",
@@ -1066,7 +1144,7 @@
             "keywords": [
                 "diff"
             ],
-            "time": "2015-02-22 15:13:53"
+            "time": "2015-02-22T15:13:53+00:00"
         },
         {
             "name": "sebastian/environment",
@@ -1116,7 +1194,7 @@
                 "environment",
                 "hhvm"
             ],
-            "time": "2015-08-03 06:14:51"
+            "time": "2015-08-03T06:14:51+00:00"
         },
         {
             "name": "sebastian/exporter",
@@ -1182,7 +1260,7 @@
                 "export",
                 "exporter"
             ],
-            "time": "2015-06-21 07:55:53"
+            "time": "2015-06-21T07:55:53+00:00"
         },
         {
             "name": "sebastian/recursion-context",
@@ -1235,7 +1313,7 @@
             ],
             "description": "Provides functionality to recursively process PHP variables",
             "homepage": "http://www.github.com/sebastianbergmann/recursion-context",
-            "time": "2015-06-21 08:04:50"
+            "time": "2015-06-21T08:04:50+00:00"
         },
         {
             "name": "sebastian/version",
@@ -1270,7 +1348,7 @@
             ],
             "description": "Library that helps with managing the version number of Git-hosted PHP projects",
             "homepage": "https://github.com/sebastianbergmann/version",
-            "time": "2015-06-21 13:59:46"
+            "time": "2015-06-21T13:59:46+00:00"
         },
         {
             "name": "symfony/finder",
@@ -1317,7 +1395,7 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "http://symfony.com",
-            "time": "2014-10-01 05:50:18"
+            "time": "2014-10-01T05:50:18+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -1364,13 +1442,14 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "http://symfony.com",
-            "time": "2014-10-01 05:50:18"
+            "time": "2014-10-01T05:50:18+00:00"
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": {
-        "jakubledl/dissect": 20
+        "jakubledl/dissect": 20,
+        "tesskyblivion/esreader": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

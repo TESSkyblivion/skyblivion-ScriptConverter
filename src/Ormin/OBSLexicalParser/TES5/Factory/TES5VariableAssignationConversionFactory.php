@@ -23,6 +23,11 @@ use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
 class TES5VariableAssignationConversionFactory {
 
     /**
+     * @var TES5ObjectCallFactory
+     */
+    private $objectCallFactory;
+
+    /**
      * @var TES5ReferenceFactory
      */
     private $referenceFactory;
@@ -52,7 +57,8 @@ class TES5VariableAssignationConversionFactory {
      */
     private $typeInferencer;
 
-    public function __construct(TES5ReferenceFactory $referenceFactory, TES5ValueFactory $valueFactory, TES5VariableAssignationFactory $assignationFactory, TES5BranchFactory $branchFactory, TES5ExpressionFactory $expressionFactory, TES5TypeInferencer $typeInferencer) {
+    public function __construct(TES5ObjectCallFactory $objectCallFactory, TES5ReferenceFactory $referenceFactory, TES5ValueFactory $valueFactory, TES5VariableAssignationFactory $assignationFactory, TES5BranchFactory $branchFactory, TES5ExpressionFactory $expressionFactory, TES5TypeInferencer $typeInferencer) {
+        $this->objectCallFactory = $objectCallFactory;
         $this->referenceFactory = $referenceFactory;
         $this->valueFactory = $valueFactory;
         $this->assignationFactory = $assignationFactory;
@@ -74,7 +80,7 @@ class TES5VariableAssignationConversionFactory {
             //Object call creation
             $objectCallArguments = new TES5ObjectCallArguments();
             $objectCallArguments->add($value);
-            $objectCall = $this->valueFactory->createObjectCall($reference, "SetValue", $multipleScriptsScope, $objectCallArguments);
+            $objectCall = $this->objectCallFactory->createObjectCall($reference, "SetValue", $multipleScriptsScope, $objectCallArguments);
             $codeChunkCollection->add($objectCall);
 
         } else {

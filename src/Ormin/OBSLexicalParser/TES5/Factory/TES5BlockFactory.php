@@ -39,11 +39,17 @@ class TES5BlockFactory
      */
     private $localScopeFactory;
 
+    /**
+     * @var TES5InitialBlockCodeFactory
+     */
+    private $initialBlockCodeFactory;
+
     public function __construct(TES5ChainedCodeChunkFactory $chainedCodeChunkFactory,
                                 TES5BlockFunctionScopeFactory $blockFunctionScopeFactory,
                                 TES5CodeScopeFactory $codeScopeFactory,
                                 TES5AdditionalBlockChangesPass $changesPass,
-                                TES5LocalScopeFactory $localScopeFactory)
+                                TES5LocalScopeFactory $localScopeFactory,
+                                TES5InitialBlockCodeFactory $initialBlockCodeFactory)
     {
 
         $this->codeChunkFactory = $chainedCodeChunkFactory;
@@ -51,6 +57,7 @@ class TES5BlockFactory
         $this->codeScopeFactory = $codeScopeFactory;
         $this->changesPass = $changesPass;
         $this->localScopeFactory = $localScopeFactory;
+        $this->initialBlockCodeFactory = $initialBlockCodeFactory;
     }
 
     private function mapBlockType($blockType)
@@ -231,8 +238,9 @@ class TES5BlockFactory
         $newBlockType = $this->mapBlockType($blockType);
         $blockFunctionScope = $this->blockFunctionScopeFactory->createFromBlockType($newBlockType);
 
-        $newBlock = new TES5EventCodeBlock($blockFunctionScope, $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope)));
+        $newBlock = $this->createNewBlock($newBlockType, $blockFunctionScope);
 
+        $conversionScope = $this->initialBlockCodeFactory->addInitialCode($multipleScriptsScope, $globalScope, $newBlock);
         if ($block->getChunks() !== null) {
 
             foreach ($block->getChunks()->getCodeChunks() as $codeChunk) {
@@ -242,7 +250,7 @@ class TES5BlockFactory
                 if ($codeChunks !== null) {
 
                     foreach ($codeChunks as $newCodeChunk) {
-                        $newBlock->addChunk($newCodeChunk);
+                        $conversionScope->add($newCodeChunk);
                     }
 
                 }

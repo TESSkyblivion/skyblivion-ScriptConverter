@@ -16,6 +16,8 @@ use Ormin\OBSLexicalParser\TES5\Types\TES5Type;
 class TES5Property implements TES5Variable
 {
 
+    const PROPERTY_SUFFIX = "_p";
+
     /**
      * The property's name as seen in script
      * @var string
@@ -43,7 +45,7 @@ class TES5Property implements TES5Variable
 
     function __construct($propertyName, TES5Type $propertyType, $referenceEdid)
     {
-        $this->propertyName = $propertyName . "_p"; //we're adding _p prefix because papyrus compiler complains about property names named after other scripts, _p makes sure we won't conflict.
+        $this->propertyName = $propertyName . self::PROPERTY_SUFFIX; //we're adding _p prefix because papyrus compiler complains about property names named after other scripts, _p makes sure we won't conflict.
         $this->propertyType = $propertyType; //If we're tracking a script, this won't be used anymore
         $this->referenceEdid = $referenceEdid;
         $this->trackedScript = null;
@@ -52,7 +54,8 @@ class TES5Property implements TES5Variable
     public function output()
     {
         $propertyType = $this->getPropertyType()->output();
-        return [$propertyType . ' Property ' . $this->propertyName . ' Auto'];
+        //Todo - Actually differentiate between properties which need and do not need to be conditional
+        return [$propertyType . ' Property ' . $this->propertyName . ' Auto Conditional'];
     }
 
     /**
@@ -61,6 +64,11 @@ class TES5Property implements TES5Variable
     public function getPropertyName()
     {
         return $this->propertyName;
+    }
+
+    public function renameTo($newName)
+    {
+        $this->propertyName = $newName . self::PROPERTY_SUFFIX;
     }
 
     /**

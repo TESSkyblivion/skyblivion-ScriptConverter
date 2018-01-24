@@ -10,6 +10,8 @@ namespace Ormin\OBSLexicalParser\TES5\Factory;
 use Ormin\OBSLexicalParser\TES4\AST\VariableDeclaration\TES4VariableDeclaration;
 use Ormin\OBSLexicalParser\TES4\AST\VariableDeclaration\TES4VariableDeclarationList;
 use Ormin\OBSLexicalParser\TES4\Types\TES4Type;
+use Ormin\OBSLexicalParser\TES5\AST\Property\Collection\TES5GlobalVariables;
+use Ormin\OBSLexicalParser\TES5\AST\Property\TES5GlobalVariable;
 use Ormin\OBSLexicalParser\TES5\AST\Property\TES5Property;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
@@ -22,14 +24,28 @@ class TES5PropertiesFactory {
     /**
      * Create an pre-defined property from a ref VariableDeclaration
      * @param TES4VariableDeclaration $declaration
+     * @param TES5GlobalVariables $globalVariables
      * @return TES5Variable
      */
-    private function createPropertyFromReference(TES4VariableDeclaration $declaration)
+    private function createPropertyFromReference(TES4VariableDeclaration $declaration,
+                                                 TES5GlobalVariables $globalVariables)
     {
-        return new TES5Property($declaration->getVariableName(), TES5BasicType::T_FORM(), $declaration->getVariableName());
+        if($globalVariables->hasGlobalVariable($declaration->getVariableName())) {
+            return new TES5Property($declaration->getVariableName(), TES5BasicType::T_GLOBALVARIABLE(), $declaration->getVariableName());
+        } else {
+            return new TES5Property($declaration->getVariableName(), TES5BasicType::T_FORM(), $declaration->getVariableName());
+        }
     }
 
-    public function createProperties(TES4VariableDeclarationList $variableList, TES5GlobalScope $globalScope) {
+    /**
+     * @param TES4VariableDeclarationList $variableList
+     * @param TES5GlobalScope $globalScope
+     * @param TES5GlobalVariables $globalVariables
+     * @throws ConversionException
+     */
+    public function createProperties(TES4VariableDeclarationList $variableList,
+                                     TES5GlobalScope $globalScope,
+                                     TES5GlobalVariables $globalVariables) {
 
 
         /**
@@ -68,7 +84,7 @@ class TES5PropertiesFactory {
 
                 case TES4Type::T_REF():
                 {
-                    $property = $this->createPropertyFromReference($variable);
+                    $property = $this->createPropertyFromReference($variable, $globalVariables);
                     break;
                 }
 

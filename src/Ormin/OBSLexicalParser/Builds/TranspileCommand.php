@@ -13,7 +13,7 @@ use Ormin\OBSLexicalParser\TES5\AST\TES5Target;
 
 interface TranspileCommand {
 
-    public function initialize();
+    public function initialize(Build $build);
 
     /**
      * @param $sourcePaths

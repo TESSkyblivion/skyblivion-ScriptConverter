@@ -27,16 +27,16 @@ use Ormin\OBSLexicalParser\TES5\Factory\TES5CodeScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ExpressionFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5LocalScopeFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5ReferenceFactory;
-use Ormin\OBSLexicalParser\TES5\Factory\TES5ValueFactory;
+use Ormin\OBSLexicalParser\TES5\Factory\TES5ObjectCallFactory;
 use Ormin\OBSLexicalParser\TES5\Factory\TES5VariableAssignationFactory;
 use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
 
 class TES5AdditionalBlockChangesPass {
 
     /**
-     * @var TES5ValueFactory
+     * @var TES5ObjectCallFactory
      */
-    private $valueFactory;
+    private $objectCallFactory;
 
     /**
      * @var TES5BlockFunctionScopeFactory
@@ -73,7 +73,7 @@ class TES5AdditionalBlockChangesPass {
      */
     private $localScopeFactory;
 
-    public function __construct(TES5ValueFactory $valueFactory,
+    public function __construct(TES5ObjectCallFactory $objectCallFactory,
                                 TES5BlockFunctionScopeFactory $blockFunctionScopeFactory,
                                 TES5CodeScopeFactory $codeScopeFactory,
                                 TES5ExpressionFactory $expressionFactory,
@@ -81,7 +81,7 @@ class TES5AdditionalBlockChangesPass {
                                 TES5BranchFactory $branchFactory,
                                 TES5VariableAssignationFactory $assignationFactory,
                                 TES5LocalScopeFactory $localScopeFactory) {
-        $this->valueFactory = $valueFactory;
+        $this->objectCallFactory = $objectCallFactory;
         $this->blockFunctionScopeFactory = $blockFunctionScopeFactory;
         $this->codeScopeFactory = $codeScopeFactory;
         $this->expressionFactory = $expressionFactory;
@@ -114,9 +114,11 @@ class TES5AdditionalBlockChangesPass {
                 $args = new TES5ObjectCallArguments();
                 $args->add(new TES5Float(self::ON_UPDATE_TICK));
 
-                $function = $this->valueFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "RegisterForSingleUpdate", $multipleScriptsScope, $args);
+                $function = $this->objectCallFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "RegisterForSingleUpdate", $multipleScriptsScope, $args);
                 $newInitBlock->addChunk($function);
                 $blockList->add($newInitBlock);
+                
+                $newBlock->addChunk($function);
 
 
                 break;
@@ -126,7 +128,7 @@ class TES5AdditionalBlockChangesPass {
                 $onInitFunctionScope = $this->blockFunctionScopeFactory->createFromBlockType("OnInit");
                 $newInitBlock = new TES5EventCodeBlock($onInitFunctionScope,$this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($onInitFunctionScope)));
 
-                $function = $this->valueFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "BlockActivation", $multipleScriptsScope);
+                $function = $this->objectCallFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "BlockActivation", $multipleScriptsScope);
                 $newInitBlock->addChunk($function);
                 $blockList->add($newInitBlock);
                 break;
@@ -144,7 +146,7 @@ class TES5AdditionalBlockChangesPass {
                 $parameterList = $parameterList->getVariableList();
                 $tesEquippedTarget = $parameterList[0];
                 $localScope = $newBlock->getCodeScope()->getLocalScope();
-                $newContainer = $this->valueFactory->createReadReference($tesEquippedTarget->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
+                $newContainer = $this->referenceFactory->createReadReference($tesEquippedTarget->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
 
                 $expression = $this->expressionFactory->createArithmeticExpression(
                     $this->referenceFactory->createReferenceToVariable($localScope->findVariableWithMeaning(TES5LocalVariableParameterMeaning::CONTAINER())),
@@ -196,7 +198,7 @@ class TES5AdditionalBlockChangesPass {
                     //NOT TESTED
                     $parameterList = $parameterList->getVariableList();
 
-                    $targetActor = $this->valueFactory->createReadReference($parameterList[0]->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
+                    $targetActor = $this->referenceFactory->createReadReference($parameterList[0]->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
 
                     $interExpression = $this->expressionFactory->createArithmeticExpression(
                         $this->referenceFactory->createReferenceToVariable($activator),
@@ -244,7 +246,7 @@ class TES5AdditionalBlockChangesPass {
                 $parameterList = $parameterList->getVariableList();
                 $tesEquippedTarget = $parameterList[0];
                 $localScope = $newBlock->getCodeScope()->getLocalScope();
-                $newContainer = $this->valueFactory->createReadReference($tesEquippedTarget->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
+                $newContainer = $this->referenceFactory->createReadReference($tesEquippedTarget->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
 
                 $expression = $this->expressionFactory->createArithmeticExpression(
                     $this->referenceFactory->createReferenceToVariable($localScope->getVariableByName("akNewContainer")),
@@ -280,7 +282,7 @@ class TES5AdditionalBlockChangesPass {
                 $parameterList = $parameterList->getVariableList();
                 $tesEquippedTarget = $parameterList[0];
                 $localScope = $newBlock->getCodeScope()->getLocalScope();
-                $newContainer = $this->valueFactory->createReadReference($tesEquippedTarget->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
+                $newContainer = $this->referenceFactory->createReadReference($tesEquippedTarget->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
 
                 $expression = $this->expressionFactory->createArithmeticExpression(
                     $this->referenceFactory->createReferenceToVariable($localScope->getVariableByName("akOldContainer")),
@@ -316,7 +318,7 @@ class TES5AdditionalBlockChangesPass {
                 $parameterList = $parameterList->getVariableList();
                 $tesEquippedTarget = $parameterList[0];
                 $localScope = $newBlock->getCodeScope()->getLocalScope();
-                $newContainer = $this->valueFactory->createReadReference($tesEquippedTarget->getBlockParameter(), $globalScope, $multipleScriptsScope, $localScope);
+                $newContainer = $this->referenceFactory->createReadReference($tesEquippedTarget->getBlockParameter(), $globalScope, $multipleScriptsScope, $localScope);
 
                 $expression = $this->expressionFactory->createArithmeticExpression(
                     $this->referenceFactory->createReferenceToVariable($localScope->getVariableByName("akNewPackage")),
@@ -347,7 +349,7 @@ class TES5AdditionalBlockChangesPass {
                 $parameterList = $block->getBlockParameterList()->getVariableList();
                 $tesEquippedTarget = $parameterList[0];
                 $localScope = $newBlock->getCodeScope()->getLocalScope();
-                $newContainer = $this->valueFactory->createReadReference($tesEquippedTarget->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
+                $newContainer = $this->referenceFactory->createReadReference($tesEquippedTarget->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
 
                 $expression = $this->expressionFactory->createArithmeticExpression(
                     $this->referenceFactory->createReferenceToVariable($localScope->getVariableByName("akOldPackage")),
@@ -378,7 +380,7 @@ class TES5AdditionalBlockChangesPass {
             //@INCONSISTENCE - We don't account for alarm type.
 
             $expression = $this->expressionFactory->createArithmeticExpression(
-                $this->valueFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "IsAlarmed",$multipleScriptsScope),
+                $this->objectCallFactory->createObjectCall($this->referenceFactory->createReferenceToSelf($globalScope), "IsAlarmed",$multipleScriptsScope),
                 TES5ArithmeticExpressionOperator::OPERATOR_EQUAL(),
                 new TES5Bool(true)
             );
@@ -439,6 +441,37 @@ class TES5AdditionalBlockChangesPass {
             break;
         }
             */
+
+        case 'onequip':
+        case 'onunequip': {
+            if($block->getBlockParameterList() != null) {
+                $parameterList = $block->getBlockParameterList()->getVariableList();
+                $equipActor = $parameterList[0];
+                $localScope = $newBlock->getCodeScope()->getLocalScope();
+                $equipActorRef = $this->referenceFactory->createReference($equipActor->getBlockParameter(),$globalScope, $multipleScriptsScope, $localScope);
+
+                $expression = $this->expressionFactory->createArithmeticExpression(
+                    $this->referenceFactory->createReferenceToVariable($localScope->getVariableByName("akActor")),
+                    TES5ArithmeticExpressionOperator::OPERATOR_EQUAL(),
+                    $equipActorRef
+                );
+
+                $newCodeScope = $this->codeScopeFactory->createCodeScope($this->localScopeFactory->createRootScope($blockFunctionScope));
+
+                $outerBranchCode = unserialize(serialize($newBlock->getCodeScope()));
+                $outerBranchCode->getLocalScope()->setParentScope($newCodeScope->getLocalScope());
+
+                $newCodeScope->add(new TES5Branch(
+                    new TES5SubBranch(
+                        $expression,
+                        $outerBranchCode
+                    )
+                ));
+                $newBlock->setCodeScope($newCodeScope);
+            }
+
+            break;
+        }
 
         }
 

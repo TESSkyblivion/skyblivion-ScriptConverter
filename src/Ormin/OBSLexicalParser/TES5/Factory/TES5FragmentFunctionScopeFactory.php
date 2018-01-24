@@ -58,9 +58,5 @@ class TES5FragmentFunctionScopeFactory
         return $localScope;
 
     }
-
-    public function createRecursiveScope(TES5LocalScope $parentScope) {
-        return new TES5LocalScope($parentScope);
-    }
-
+    
 } 

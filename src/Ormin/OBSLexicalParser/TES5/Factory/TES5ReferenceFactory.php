@@ -16,12 +16,19 @@ use Ormin\OBSLexicalParser\TES5\AST\Property\TES5Property;
 use Ormin\OBSLexicalParser\TES5\AST\Property\TES5Variable;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5GlobalScope;
 use Ormin\OBSLexicalParser\TES5\AST\Scope\TES5MultipleScriptsScope;
+use Ormin\OBSLexicalParser\TES5\Exception\ConversionException;
 use Ormin\OBSLexicalParser\TES5\Types\TES5BasicType;
+use Ormin\OBSLexicalParser\TES5\AST\Object\TES5Referencer;
 
 class TES5ReferenceFactory
 {
 
     const MESSAGEBOX_VARIABLE_CONST = "TES4_MESSAGEBOX_RESULT";
+
+    /**
+     * @var TES5ObjectCallFactory
+     */
+    private $objectCallFactory;
 
     /**
      * @var TES5ObjectPropertyFactory
@@ -33,7 +40,8 @@ class TES5ReferenceFactory
      */
     private $special_conversions;
 
-    public function __construct(TES5ObjectPropertyFactory $objectPropertyFactory) {
+    public function __construct(TES5ObjectCallFactory $objectCallFactory, TES5ObjectPropertyFactory $objectPropertyFactory) {
+        $this->objectCallFactory = $objectCallFactory;
         $this->objectPropertyFactory = $objectPropertyFactory;
 
         //Those are used to hook in the internal Skyblivion systems.
@@ -49,7 +57,7 @@ class TES5ReferenceFactory
             'tContainer' => TES5TypeFactory::memberByValue("TES4Container", TES5BasicType::T_QUEST()), //Data container
             'tTimer' => TES5TypeFactory::memberByValue("TES4TimerHelper", TES5BasicType::T_QUEST()), //Timer functions
             'tGSPLocalTimer' => TES5BasicType::T_FLOAT(), //used for get seconds passed logical conversion
-            'TES4CyrodiilCrimeFaction' => TES5BasicType::T_FACTION(), //global cyrodiil faction, WE HAVE BETTER CRIME SYSTEM IN CYRODIIL DAWG
+            'CyrodiilCrimeFaction' => TES5BasicType::T_FACTION(), //global cyrodiil faction, WE HAVE BETTER CRIME SYSTEM IN CYRODIIL DAWG
             self::MESSAGEBOX_VARIABLE_CONST => TES5BasicType::T_INT() // set by script instead of original messageBox
         ];
 
@@ -73,6 +81,76 @@ class TES5ReferenceFactory
     public function createReferenceToPlayer()
     {
         return new TES5PlayerReference();
+    }
+
+    /**
+     * Extracts implicit reference from calls.
+     * Returns a reference from calls like:
+     * Enable
+     * Disable
+     * Activate
+     * GetInFaction whatsoever
+     * @param TES5GlobalScope $globalScope
+     * @param TES5MultipleScriptsScope $multipleScriptsScope
+     * @param TES5LocalScope $localScope
+     * @return TES5Referencer
+     * @throws \Ormin\OBSLexicalParser\TES5\Exception\ConversionException
+     */
+    public function extractImplicitReference(TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope, TES5LocalScope $localScope)
+    {
+        switch ($globalScope->getScriptHeader()->getBasicScriptType()) {
+            case TES5BasicType::T_OBJECTREFERENCE(): {
+                return $this->createReferenceToSelf($globalScope);
+            }
+
+            case TES5BasicType::T_ACTIVEMAGICEFFECT(): {
+                $self = $this->createReferenceToSelf($globalScope);
+                return $this->objectCallFactory->createObjectCall($self, "GetTargetActor",$multipleScriptsScope);
+            }
+
+            case TES5BasicType::T_QUEST(): {
+                //todo - this should not be done like this
+                //we should actually not try to extract the implicit reference on the non-reference oblivion functions like "stopQuest"
+                //think of this line as a hacky way to just get code forward.
+                return $this->createReferenceToSelf($globalScope);
+            }
+
+
+            /**
+             * TIF Fragments
+             */
+            case TES5BasicType::T_TOPICINFO(): {
+                return $this->createReadReference('akSpeakerRef', $globalScope, $multipleScriptsScope, $localScope);
+            }
+
+            default: {
+                throw new ConversionException("Cannot extract implicit reference - unknown basic script type.");
+            }
+
+        }
+    }
+
+    /**
+     * Create the ,,read reference".
+     * Read reference is used ( as you might think ) in read contexts.
+     * @param $referenceName
+     * @param TES5GlobalScope $globalScope
+     * @param TES5MultipleScriptsScope $multipleScriptsScope
+     * @param TES5LocalScope $localScope
+     * @return TES5Referencer
+     */
+    public function createReadReference($referenceName, TES5GlobalScope $globalScope, TES5MultipleScriptsScope $multipleScriptsScope, TES5LocalScope $localScope)
+    {
+
+        $rawReference = $this->createReference($referenceName, $globalScope, $multipleScriptsScope, $localScope);
+
+        if ($rawReference->getType() == TES5BasicType::T_GLOBALVARIABLE()) {
+            //Changed to int implementation.
+            return $this->objectCallFactory->createObjectCall($rawReference, "GetValueInt",$multipleScriptsScope);
+        } else {
+            return $rawReference;
+        }
+
     }
 
     /**
@@ -116,7 +194,7 @@ class TES5ReferenceFactory
 
                 if ($property === null) {
 
-                    if (!$globalScope->hasGlobalVariable($referenceName)) {
+                    if (!$multipleScriptsScope->hasGlobalVariable($referenceName)) {
                         $property = new TES5Property($referenceName, TES5BasicType::T_FORM(), $referenceName);
                     } else {
                         $property = new TES5Property($referenceName, TES5BasicType::T_GLOBALVARIABLE(), $referenceName);

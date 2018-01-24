@@ -58,6 +58,11 @@ class TES5FunctionScope
         }
     }
 
+    public function renameTo($newName)
+    {
+        $this->blockName = $newName;
+    }
+
     public function getVariableByName($name) {
 
         return (

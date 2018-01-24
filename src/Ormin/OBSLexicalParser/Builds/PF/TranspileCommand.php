@@ -7,9 +7,11 @@
 namespace Ormin\OBSLexicalParser\Builds\PF;
 
 
+use Ormin\OBSLexicalParser\Builds\Build;
+
 class TranspileCommand implements \Ormin\OBSLexicalParser\Builds\TranspileCommand {
 
-    public function initialize()
+    public function initialize(Build $build)
     {
         // TODO: Implement initialize() method.
     }

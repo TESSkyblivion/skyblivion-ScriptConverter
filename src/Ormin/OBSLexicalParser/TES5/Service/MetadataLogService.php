@@ -7,12 +7,15 @@
 namespace Ormin\OBSLexicalParser\TES5\Service;
 
 
+use Ormin\OBSLexicalParser\Builds\Build;
+
 class MetadataLogService {
 
     private $handle;
 
-    public function __construct($filename) {
-        $this->handle = fopen($filename,'w+');
+    public function __construct(Build $build) {
+        $filename = $build->getBuildPath() . "Metadata";
+        $this->handle = fopen($filename,'a+');
     }
 
     public function add($command,$arguments = []) {
